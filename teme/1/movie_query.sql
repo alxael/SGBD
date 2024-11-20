@@ -1,0 +1,16 @@
+WITH CATEGORY_COUNTS AS (
+    SELECT
+        COUNT(M.MOVIE_ID) AS CATEGORY_COUNT
+    FROM
+        MOVIE          M
+        INNER JOIN MOVIE_CATEGORY MC
+        ON M.MOVIE_ID = MC.MOVIE_ID
+    GROUP BY
+        M.MOVIE_ID
+)
+SELECT
+    COUNT(*) AS "Movies with more than 2 categories"
+FROM
+    CATEGORY_COUNTS CC
+WHERE
+    CC.CATEGORY_COUNT >= 2;

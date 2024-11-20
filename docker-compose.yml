@@ -1,0 +1,9 @@
+services:
+  database:
+    image: oracle/database:19.3.0-ee-slim-faststart
+    environment:
+      ORACLE_PASSWORD: Sgbd2024
+    ports:
+      - 1521:1521
+      
+    

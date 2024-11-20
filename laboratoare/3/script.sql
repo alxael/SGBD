@@ -1,0 +1,86 @@
+SET VERIFY OFF
+
+SET FEEDBACK ON
+
+SET SERVEROUTPUT ON
+
+DECLARE
+    V_COD           EMPLOYEES.EMPLOYEE_ID%TYPE:=&P_COD;
+    V_BONUS         NUMBER(8);
+    V_SALARIU_ANUAL NUMBER(8);
+BEGIN
+    SELECT
+        SALARY*12 INTO V_SALARIU_ANUAL
+    FROM
+        EMPLOYEES
+    WHERE
+        EMPLOYEE_ID = V_COD;
+    CASE
+        WHEN V_SALARIU_ANUAL>=200001
+        THEN
+            V_BONUS:=20000;
+        WHEN V_SALARIU_ANUAL BETWEEN 100001 AND 200000
+        THEN
+            V_BONUS:=10000;
+        ELSE
+            V_BONUS:=5000;
+    END CASE;
+
+    DBMS_OUTPUT.PUT_LINE('Bonusul este '
+                         || V_BONUS);
+END;
+/
+
+SET VERIFY ON
+
+SET FEEDBACK OFF
+
+SET SERVEROUTPUT OFF
+
+WITH HIRE_DAYS AS (
+    SELECT
+        EXTRACT(DAY FROM E.HIRE_DATE) AS DAY,
+        E.EMPLOYEE_ID                 AS EMPLOYEE_ID
+    FROM
+        EMPLOYEES E
+    WHERE
+        EXTRACT(MONTH FROM E.HIRE_DATE)=10
+), OCTOBER_DAYS AS (
+    SELECT
+        LEVEL AS DAY
+    FROM
+        DUAL
+    CONNECT BY
+        LEVEL <= 31
+)
+SELECT
+    OD.DAY,
+    (
+        SELECT
+            COUNT(*)
+        FROM
+            HIRE_DAYS
+        WHERE
+            DAY=OD.DAY
+    ) AS HIRES
+FROM
+    OCTOBER_DAYS OD;
+
+DECLARE
+    DAY NUMBER(2);
+    TYPE HIRES IS
+        VARRAY(32) OF NUMBER(2);
+BEGIN
+    FOR ITEM IN LOOP (
+        SELECT
+            EXTRACT(DAY FROM E.HIRE_DATE) AS DAY,
+            E.EMPLOYEE_ID AS EMPLOYEE_ID
+        FROM
+            EMPLOYEES E
+        WHERE
+            EXTRACT(MONTH FROM E.HIRE_DATE)=10
+    )
+        day := ITEM.DAY;
+        HIRES(&day) := HIRES(&day) + 1;
+    END LOOP;
+END;
