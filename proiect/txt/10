@@ -1,0 +1,92 @@
+Initial:
+
+Cinema City
+Adresa: Calea Vacaresti
+Medie rezervari per difuzare: 7
+
+Cinema City
+Adresa: Strada Liviu Rebreanu
+Medie rezervari per difuzare: 6.75
+
+Cinema City
+Adresa: Bulevardul Pierre de Coubertin
+Medie rezervari per difuzare: 7.3077
+
+Cinema City
+Adresa: Bulevardul Doina Cornea
+Medie rezervari per difuzare: 5.4375
+
+IMAX
+Adresa: Bulevardul Doina Cornea
+Medie rezervari per difuzare: 4.5
+
+Dupa crearea unei rezervari noi:
+
+Cinema City
+Adresa: Calea Vacaresti
+Medie rezervari per difuzare: 7
+
+Cinema City
+Adresa: Strada Liviu Rebreanu
+Medie rezervari per difuzare: 6.75
+
+Cinema City
+Adresa: Bulevardul Pierre de Coubertin
+Medie rezervari per difuzare: 7.3077
+
+Cinema City
+Adresa: Bulevardul Doina Cornea
+Medie rezervari per difuzare: 5.5
+
+IMAX
+Adresa: Bulevardul Doina Cornea
+Medie rezervari per difuzare: 4.5
+
+Dupa modificarea rezervarii:
+
+Cinema City
+Adresa: Calea Vacaresti
+Medie rezervari per difuzare: 7
+
+Cinema City
+Adresa: Strada Liviu Rebreanu
+Medie rezervari per difuzare: 6.75
+
+Cinema City
+Adresa: Bulevardul Pierre de Coubertin
+Medie rezervari per difuzare: 7.3846
+
+Cinema City
+Adresa: Bulevardul Doina Cornea
+Medie rezervari per difuzare: 5.4375
+
+IMAX
+Adresa: Bulevardul Doina Cornea
+Medie rezervari per difuzare: 4.5
+
+Dupa stergerea rezervarii:
+
+Cinema City
+Adresa: Calea Vacaresti
+Medie rezervari per difuzare: 7
+
+Cinema City
+Adresa: Strada Liviu Rebreanu
+Medie rezervari per difuzare: 6.75
+
+Cinema City
+Adresa: Bulevardul Pierre de Coubertin
+Medie rezervari per difuzare: 7.3077
+
+Cinema City
+Adresa: Bulevardul Doina Cornea
+Medie rezervari per difuzare: 5.4375
+
+IMAX
+Adresa: Bulevardul Doina Cornea
+Medie rezervari per difuzare: 4.5
+
+
+
+PL/SQL procedure successfully completed.
+

@@ -1,0 +1,159 @@
+Inregistrarea 1
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Dominique Whitley
+Cod loc: LOC-4-5
+
+Inregistrarea 2
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Fleur Bray
+Cod loc: LOC-4-6
+
+Inregistrarea 3
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Ebony Hale
+Cod loc: LOC-4-7
+
+Inregistrarea 4
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Wendy Goodwin
+Cod loc: LOC-4-7
+
+Inregistrarea 5
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Garrett Lawrence
+Cod loc: LOC-4-10
+
+Inregistrarea 6
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Dennis Hoover
+Cod loc: LOC-4-14
+
+Inregistrarea 7
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Allistair Pate
+Cod loc: LOC-4-21
+
+Inregistrarea 8
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Fleur Bray
+Cod loc: LOC-4-27
+
+Eroare! ORA-20002: Data de inceput succede data de sfarsit.
+Inregistrarea 1
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Dominique Whitley
+Cod loc: LOC-4-5
+
+Inregistrarea 2
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Fleur Bray
+Cod loc: LOC-4-6
+
+Inregistrarea 3
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Ebony Hale
+Cod loc: LOC-4-7
+
+Inregistrarea 4
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Wendy Goodwin
+Cod loc: LOC-4-7
+
+Inregistrarea 5
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Garrett Lawrence
+Cod loc: LOC-4-10
+
+Inregistrarea 6
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Dennis Hoover
+Cod loc: LOC-4-14
+
+Inregistrarea 7
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Allistair Pate
+Cod loc: LOC-4-21
+
+Inregistrarea 8
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Melyssa Sears
+Cod loc: LOC-4-21
+
+Inregistrarea 9
+Sala: Beijing
+Film: Palm Springs
+Difuzare: 6
+Data difuzarii: 15.09.2025
+Pret pentru bilet: 20
+Nume complet: Fleur Bray
+Cod loc: LOC-4-27
+
+Eroare! ORA-20003: O rezervare invalida a fost gasita in lista rezervarilor asociate difuzarilor.
+
+
+PL/SQL procedure successfully completed.
+

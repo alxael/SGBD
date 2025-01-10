@@ -1,0 +1,25 @@
+CREATE SEQUENCE SEQ_BACKUP_TABLE_INDEX START WITH 1 INCREMENT BY 1 MINVALUE 1 NOMAXVALUE NOCYCLE CACHE 2;
+
+CREATE OR REPLACE TRIGGER BACKUP_TABEL_MODIFICAT_SAU_STERS BEFORE ALTER OR DROP ON SCHEMA
+DECLARE
+    NUME_OBIECT        VARCHAR2(255);
+    TIP_OBIECT         VARCHAR2(255);
+    QUERY_BACKUP_TABEL VARCHAR2(255);
+BEGIN
+    NUME_OBIECT := UPPER(TRIM(ORA_DICT_OBJ_NAME));
+    TIP_OBIECT := UPPER(TRIM(ORA_DICT_OBJ_TYPE));
+    IF TIP_OBIECT = 'TABLE' THEN
+        QUERY_BACKUP_TABEL := 'CREATE TABLE BACKUP_'
+                              || SEQ_BACKUP_TABLE_INDEX.NEXTVAL
+                              || '_'
+                              || NUME_OBIECT
+                              || ' AS (SELECT * FROM '
+                              || NUME_OBIECT
+                              || ')';
+        EXECUTE IMMEDIATE QUERY_BACKUP_TABEL;
+        DBMS_OUTPUT.PUT_LINE('S-a realizat backup la tabelul '
+                             ||NUME_OBIECT );
+    END IF;
+END;
+
+/

@@ -1,0 +1,112 @@
+DECLARE
+    ID_FILM_1             FILME.ID_FILM%TYPE := 1;
+    DATA_INCEPUT_1        DIFUZARI.DATA%TYPE := TO_DATE('2025/09/15', 'yyyy/mm/dd');
+    DATA_SFARSIT_1        DIFUZARI.DATA%TYPE := TO_DATE('2025/09/15', 'yyyy/mm/dd');
+    ID_FILM_2             FILME.ID_FILM%TYPE := 2;
+    DATA_INCEPUT_2        DIFUZARI.DATA%TYPE := TO_DATE('2025/09/25', 'yyyy/mm/dd');
+    DATA_SFARSIT_2        DIFUZARI.DATA%TYPE := TO_DATE('2025/09/15', 'yyyy/mm/dd');
+    ID_LOC_REZERVARE      REZERVARI.ID_LOC%TYPE;
+    ID_DIFUZARE_REZERVARE REZERVARI.ID_DIFUZARE%TYPE;
+    ID_CLIENT_REZERVARE   REZERVARI.ID_CLIENT%TYPE := ROUND(DBMS_RANDOM.VALUE(1, 100));
+    DATE_DIFUZARI         DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARI;
+    DATE_DIFUZARE         DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARE;
+
+    PROCEDURE AFISARE_DATE_DIFUZARI (
+        DATE_DIFUZARI IN DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARI
+    ) IS
+    BEGIN
+        FOR INDEX_DATE_DIFUZARE IN DATE_DIFUZARI.FIRST..DATE_DIFUZARI.LAST LOOP
+            DATE_DIFUZARE := DATE_DIFUZARI(INDEX_DATE_DIFUZARE);
+            DBMS_OUTPUT.PUT_LINE('Inregistrarea '
+                                 || INDEX_DATE_DIFUZARE);
+            DBMS_OUTPUT.PUT_LINE('Sala: '
+                                 || DATE_DIFUZARE.COD_SALA);
+            DBMS_OUTPUT.PUT_LINE('Film: '
+                                 || DATE_DIFUZARE.TITLU_FILM);
+            DBMS_OUTPUT.PUT_LINE('Difuzare: '
+                                 || DATE_DIFUZARE.ID_DIFUZARE);
+            DBMS_OUTPUT.PUT_LINE('Data difuzarii: '
+                                 || TO_CHAR(DATE_DIFUZARE.DATA_DIFUZARE, 'dd.mm.yyyy'));
+            DBMS_OUTPUT.PUT_LINE('Pret pentru bilet: '
+                                 || DATE_DIFUZARE.PRET_DIFUZARE);
+            DBMS_OUTPUT.PUT_LINE('Nume complet: '
+                                 || DATE_DIFUZARE.NUME_PRENUME);
+            DBMS_OUTPUT.PUT_LINE('Cod loc: '
+                                 || DATE_DIFUZARE.COD_LOC);
+            DBMS_OUTPUT.NEW_LINE();
+        END LOOP;
+    END AFISARE_DATE_DIFUZARI;
+BEGIN
+    SELECT
+        D.ID_DIFUZARE INTO ID_DIFUZARE_REZERVARE
+    FROM
+        (
+            SELECT
+                D.ID_DIFUZARE
+            FROM
+                DIFUZARI D
+            WHERE
+                D.ID_FILM = ID_FILM_1
+                AND D.DATA BETWEEN DATA_INCEPUT_1 AND DATA_SFARSIT_1
+        ) D
+    WHERE
+        ROWNUM <= 1;
+    ID_LOC_REZERVARE := LOC_ALEATOR_LA_DIFUZARE(ID_DIFUZARE_REZERVARE);
+ 
+    -- Caz simplu
+    DIFUZARI_FILM_IN_INTERVAL_DE_TIMP(ID_FILM_1, DATA_INCEPUT_1, DATA_SFARSIT_1, DATE_DIFUZARI);
+    AFISARE_DATE_DIFUZARI(DATE_DIFUZARI);
+ 
+    -- Caz in care datele sunt invalide
+    BEGIN
+        DIFUZARI_FILM_IN_INTERVAL_DE_TIMP(ID_FILM_2, DATA_INCEPUT_2, DATA_SFARSIT_2, DATE_DIFUZARI);
+        AFISARE_DATE_DIFUZARI(DATE_DIFUZARI);
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Eroare! '
+                                 || SUBSTR(SQLERRM, 1, 255));
+    END;
+ 
+
+    -- Caz in care se insereaza o rezervare noua
+    INSERT INTO REZERVARI(
+        ID_LOC,
+        ID_DIFUZARE,
+        ID_CLIENT
+    ) VALUES (
+        ID_LOC_REZERVARE,
+        ID_DIFUZARE_REZERVARE,
+        ID_CLIENT_REZERVARE
+    );
+    BEGIN
+        DIFUZARI_FILM_IN_INTERVAL_DE_TIMP(ID_FILM_1, DATA_INCEPUT_1, DATA_SFARSIT_1, DATE_DIFUZARI);
+        AFISARE_DATE_DIFUZARI(DATE_DIFUZARI);
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Eroare! '
+                                 || SUBSTR(SQLERRM, 1, 255));
+    END;
+ 
+
+    -- Caz in care se detecteaza on rezervare invalida
+    UPDATE REZERVARI R
+    SET
+        R.ID_LOC = ID_LOC_REZERVARE + 30
+    WHERE
+        R.ID_LOC = ID_LOC_REZERVARE
+        AND R.ID_DIFUZARE = ID_DIFUZARE_REZERVARE
+        AND R.ID_CLIENT = ID_CLIENT_REZERVARE;
+    BEGIN
+        DIFUZARI_FILM_IN_INTERVAL_DE_TIMP(ID_FILM_1, DATA_INCEPUT_1, DATA_SFARSIT_1, DATE_DIFUZARI);
+        AFISARE_DATE_DIFUZARI(DATE_DIFUZARI);
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Eroare! '
+                                 || SUBSTR(SQLERRM, 1, 255));
+    END;
+    DELETE FROM REZERVARI R
+    WHERE
+        R.ID_LOC = ID_LOC_REZERVARE
+        AND R.ID_DIFUZARE = ID_DIFUZARE_REZERVARE
+        AND R.ID_CLIENT = ID_CLIENT_REZERVARE;
+END;

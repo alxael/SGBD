@@ -1,0 +1,65 @@
+DECLARE
+    ID_DIFUZARE_REZERVARE     REZERVARI.ID_DIFUZARE%TYPE := 1;
+    ID_DIFUZARE_REZERVARE_NOU REZERVARI.ID_DIFUZARE%TYPE := 2;
+    ID_LOC_REZERVARE          REZERVARI.ID_LOC%TYPE;
+    ID_LOC_REZERVARE_NOU      REZERVARI.ID_LOC%TYPE;
+    ID_CLIENT_REZERVARE       REZERVARI.ID_CLIENT%TYPE := ROUND(DBMS_RANDOM.VALUE(1, 100));
+
+    PROCEDURE AFISARE_CINEMA (
+        MESAJ_INCEPUT IN VARCHAR2
+    ) AS
+    BEGIN
+        DBMS_OUTPUT.PUT_LINE(MESAJ_INCEPUT);
+        DBMS_OUTPUT.NEW_LINE();
+        FOR DATE_CINEMA IN (
+            SELECT
+                *
+            FROM
+                CINEMATOGRAFE C
+                INNER JOIN LOCATII L
+                ON L.ID_LOCATIE = C.ID_LOCATIE
+        ) LOOP
+            DBMS_OUTPUT.PUT_LINE(DATE_CINEMA.NUME);
+            DBMS_OUTPUT.PUT_LINE('Adresa: '
+                                 || DATE_CINEMA.ADRESA);
+            DBMS_OUTPUT.PUT_LINE('Medie rezervari per difuzare: '
+                                 || DATE_CINEMA.MEDIE_REZERVARI_PER_DIFUZARE);
+            DBMS_OUTPUT.NEW_LINE();
+        END LOOP;
+    END AFISARE_CINEMA;
+BEGIN
+    ID_LOC_REZERVARE := LOC_ALEATOR_LA_DIFUZARE(ID_DIFUZARE_REZERVARE);
+    ID_LOC_REZERVARE_NOU := LOC_ALEATOR_LA_DIFUZARE(ID_DIFUZARE_REZERVARE_NOU);
+    AFISARE_CINEMA('Initial:');
+ 
+    -- Dupa crearea unei rezervari noi
+    INSERT INTO REZERVARI(
+        ID_LOC,
+        ID_DIFUZARE,
+        ID_CLIENT
+    ) VALUES (
+        ID_LOC_REZERVARE,
+        ID_DIFUZARE_REZERVARE,
+        ID_CLIENT_REZERVARE
+    );
+    AFISARE_CINEMA('Dupa crearea unei rezervari noi:');
+ 
+    -- Dupa modificarea rezervarii create
+    UPDATE REZERVARI R
+    SET
+        R.ID_LOC = ID_LOC_REZERVARE_NOU,
+        R.ID_DIFUZARE = ID_DIFUZARE_REZERVARE_NOU
+    WHERE
+        R.ID_LOC = ID_LOC_REZERVARE
+        AND R.ID_DIFUZARE = ID_DIFUZARE_REZERVARE
+        AND R.ID_CLIENT = ID_CLIENT_REZERVARE;
+    AFISARE_CINEMA('Dupa modificarea rezervarii:');
+ 
+    -- Dupa stergerea rezervarii modificate
+    DELETE FROM REZERVARI R
+    WHERE
+        R.ID_LOC = ID_LOC_REZERVARE_NOU
+        AND R.ID_DIFUZARE = ID_DIFUZARE_REZERVARE_NOU
+        AND R.ID_CLIENT = ID_CLIENT_REZERVARE;
+    AFISARE_CINEMA('Dupa stergerea rezervarii:');
+END;

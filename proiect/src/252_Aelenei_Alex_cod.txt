@@ -1,0 +1,2859 @@
+-- Query-ul trebuie rulat ca SYSDBA
+
+-- Creare rol nou
+
+CREATE ROLE SGBD_USER_ROLE;
+
+-- Atribuire privilegii si roluri noului rol
+
+GRANT CONNECT TO SGBD_USER_ROLE;
+
+GRANT RESOURCE TO SGBD_USER_ROLE;
+
+GRANT CREATE TABLE TO SGBD_USER_ROLE;
+
+GRANT CREATE VIEW TO SGBD_USER_ROLE;
+
+GRANT CREATE MATERIALIZED VIEW TO SGBD_USER_ROLE;
+
+GRANT CREATE SYNONYM TO SGBD_USER_ROLE;
+
+GRANT CREATE PROCEDURE TO SGBD_USER_ROLE;
+
+GRANT CREATE SEQUENCE TO SGBD_USER_ROLE;
+
+GRANT CREATE TRIGGER TO SGBD_USER_ROLE;
+
+GRANT CREATE TYPE TO SGBD_USER_ROLE;
+
+GRANT QUERY REWRITE TO SGBD_USER_ROLE;
+
+GRANT SELECT_CATALOG_ROLE TO SGBD_USER_ROLE;
+
+GRANT ALTER SESSION TO SGBD_USER_ROLE;
+
+GRANT SELECT ANY DICTIONARY TO SGBD_USER_ROLE;
+
+GRANT CREATE PUBLIC DATABASE LINK TO SGBD_USER_ROLE;
+
+GRANT CREATE PUBLIC SYNONYM TO SGBD_USER_ROLE;
+
+-- Creare utilizator nou
+
+CREATE USER SGBD_USER IDENTIFIED BY SGBDPROJECTUSER123
+PROFILE DEFAULT
+DEFAULT TABLESPACE USERS
+QUOTA UNLIMITED ON USERS
+ACCOUNT UNLOCK;
+
+-- Atribuire rol la utilizator
+
+GRANT SGBD_USER_ROLE TO SGBD_USER;
+
+-- Atribuire privilegiu
+
+GRANT UNLIMITED TABLESPACE TO SGBD_USER;
+
+CREATE TABLE LOCATII (
+    ID_LOCATIE NUMBER(10) NOT NULL,
+    TARA VARCHAR2(255) NOT NULL,
+    ORAS VARCHAR2(255) NOT NULL,
+    ADRESA VARCHAR2(255) NOT NULL,
+    COD_POSTAL VARCHAR2(10) NOT NULL,
+    CONSTRAINT LOCATII_PK PRIMARY KEY (ID_LOCATIE)
+);
+
+CREATE TABLE CINEMATOGRAFE (
+    ID_CINEMATOGRAF NUMBER(10) NOT NULL,
+    ID_LOCATIE NUMBER(10) NOT NULL,
+    NUME VARCHAR2(255) NOT NULL,
+    CONSTRAINT CINEMATOGRAFE_PK PRIMARY KEY (ID_CINEMATOGRAF),
+    CONSTRAINT CINEMATOGRAFE_LOCATIE_FK FOREIGN KEY (ID_LOCATIE) REFERENCES LOCATII(ID_LOCATIE)
+);
+
+CREATE TABLE ANGAJATI (
+    ID_ANGAJAT NUMBER(10) NOT NULL,
+    ID_MANAGER NUMBER(10),
+    NUME VARCHAR2(255) NOT NULL,
+    PRENUME VARCHAR2(255) NOT NULL,
+    CONSTRAINT ANGAJATI_PK PRIMARY KEY (ID_ANGAJAT)
+);
+
+ALTER TABLE ANGAJATI
+    ADD CONSTRAINT ANGAJATI_MANAGER_FK FOREIGN KEY (
+        ID_MANAGER
+    )
+        REFERENCES ANGAJATI(
+            ID_ANGAJAT
+        );
+
+CREATE TABLE POSTURI (
+    ID_POST NUMBER(10) NOT NULL,
+    ID_ANGAJAT NUMBER(10) NOT NULL,
+    ID_CINEMATOGRAF NUMBER(10) NOT NULL,
+    DATA_INCEPUT DATE NOT NULL,
+    DATA_SFARSIT DATE,
+    CONSTRAINT POSTURI_PK PRIMARY KEY (ID_POST),
+    CONSTRAINT POSTURI_ANGAJAT_FK FOREIGN KEY (ID_ANGAJAT) REFERENCES ANGAJATI(ID_ANGAJAT),
+    CONSTRAINT POSTURI_CINEMATOGRAF_FK FOREIGN KEY (ID_CINEMATOGRAF) REFERENCES CINEMATOGRAFE(ID_CINEMATOGRAF)
+);
+
+CREATE TABLE SALI (
+    ID_SALA NUMBER(10) NOT NULL,
+    ID_CINEMATOGRAF NUMBER(10) NOT NULL,
+    COD VARCHAR2(255) NOT NULL,
+    CONSTRAINT SALI_PK PRIMARY KEY (ID_SALA),
+    CONSTRAINT SALI_CINEMATOGRAF_FK FOREIGN KEY (ID_CINEMATOGRAF) REFERENCES CINEMATOGRAFE(ID_CINEMATOGRAF)
+);
+
+CREATE TABLE LOCURI (
+    ID_LOC NUMBER(10) NOT NULL,
+    ID_SALA NUMBER(10) NOT NULL,
+    COD VARCHAR2(20) NOT NULL,
+    CONSTRAINT LOCURI_PK PRIMARY KEY (ID_LOC),
+    CONSTRAINT LOCURI_SALA_FK FOREIGN KEY (ID_SALA) REFERENCES SALI(ID_SALA)
+);
+
+CREATE TABLE CATEGORII (
+    ID_CATEGORIE NUMBER(10) NOT NULL,
+    NUME VARCHAR2(255) NOT NULL,
+    DESCRIERE VARCHAR2(1000),
+    CONSTRAINT CATEGORII_PK PRIMARY KEY (ID_CATEGORIE)
+);
+
+CREATE TABLE FILME (
+    ID_FILM NUMBER(10) NOT NULL,
+    TITLU VARCHAR2(255) NOT NULL,
+    DURATA NUMBER(10) NOT NULL,
+    DATA_PUBLICARE DATE NOT NULL,
+    CONSTRAINT FILME_PK PRIMARY KEY (ID_FILM)
+);
+
+CREATE TABLE CATEGORII_FILME (
+    ID_FILM NUMBER(10) NOT NULL,
+    ID_CATEGORIE NUMBER(10) NOT NULL,
+    CONSTRAINT CATEGORII_FILME_PK PRIMARY KEY (ID_FILM, ID_CATEGORIE)
+);
+
+CREATE TABLE DIFUZARI (
+    ID_DIFUZARE NUMBER(10) NOT NULL,
+    ID_SALA NUMBER(10) NOT NULL,
+    ID_FILM NUMBER(10) NOT NULL,
+    DATA DATE NOT NULL,
+    PRET NUMBER(10) NOT NULL,
+    CONSTRAINT DIFUZARI_PK PRIMARY KEY (ID_DIFUZARE),
+    CONSTRAINT DIFUZARI_SALA_FK FOREIGN KEY (ID_SALA) REFERENCES SALI(ID_SALA),
+    CONSTRAINT DIFUZARI_FILM_FK FOREIGN KEY (ID_FILM) REFERENCES FILME(ID_FILM)
+);
+
+CREATE TABLE CLIENTI (
+    ID_CLIENT NUMBER(10) NOT NULL,
+    NUME VARCHAR2(255) NOT NULL,
+    PRENUME VARCHAR2(255) NOT NULL,
+    EMAIL VARCHAR2(255) NOT NULL,
+    TELEFON VARCHAR2(255) NOT NULL,
+    CONSTRAINT CLIENTI_PK PRIMARY KEY (ID_CLIENT),
+    CONSTRAINT CLIENTI_EMAIL_UNIQUE UNIQUE (EMAIL)
+);
+
+CREATE TABLE REZERVARI (
+    ID_LOC NUMBER(10) NOT NULL,
+    ID_DIFUZARE NUMBER(10) NOT NULL,
+    ID_CLIENT NUMBER(10) NOT NULL,
+    DATA DATE DEFAULT SYSDATE NOT NULL,
+    CONSTRAINT REZERVARI_PK PRIMARY KEY (ID_LOC, ID_DIFUZARE, ID_CLIENT)
+);
+
+COMMIT;
+
+INSERT INTO CATEGORII VALUES (
+    1,
+    'Horror',
+    NULL
+);
+
+INSERT INTO CATEGORII VALUES (
+    2,
+    'Action',
+    NULL
+);
+
+INSERT INTO CATEGORII VALUES (
+    3,
+    'Romance',
+    NULL
+);
+
+INSERT INTO CATEGORII VALUES (
+    4,
+    'History',
+    NULL
+);
+
+INSERT INTO CATEGORII VALUES (
+    5,
+    'Science-fiction',
+    NULL
+);
+
+INSERT INTO FILME VALUES (
+    1,
+    'Palm Springs',
+    90,
+    TO_DATE('2020/07/10', 'yyyy/mm/dd')
+);
+
+INSERT INTO FILME VALUES (
+    2,
+    'Beau Is Afraid',
+    179,
+    TO_DATE('2023/04/21', 'yyyy/mm/dd')
+);
+
+INSERT INTO FILME VALUES (
+    3,
+    'Aliens',
+    137,
+    TO_DATE('1986/07/14', 'yyyy/mm/dd')
+);
+
+INSERT INTO FILME VALUES (
+    4,
+    'Everything Everywhere All at Once',
+    132,
+    TO_DATE('2022/07/14', 'yyyy/mm/dd')
+);
+
+INSERT INTO FILME VALUES (
+    5,
+    'Pan''s Labyrinth',
+    109,
+    TO_DATE('2006/09/11', 'yyyy/mm/dd')
+);
+
+INSERT INTO CATEGORII_FILME VALUES (
+    1,
+    3
+);
+
+INSERT INTO CATEGORII_FILME VALUES (
+    1,
+    5
+);
+
+INSERT INTO CATEGORII_FILME VALUES (
+    2,
+    1
+);
+
+INSERT INTO CATEGORII_FILME VALUES (
+    2,
+    5
+);
+
+INSERT INTO CATEGORII_FILME VALUES (
+    3,
+    1
+);
+
+INSERT INTO CATEGORII_FILME VALUES (
+    3,
+    2
+);
+
+INSERT INTO CATEGORII_FILME VALUES (
+    3,
+    5
+);
+
+INSERT INTO CATEGORII_FILME VALUES (
+    4,
+    2
+);
+
+INSERT INTO CATEGORII_FILME VALUES (
+    4,
+    5
+);
+
+INSERT INTO CATEGORII_FILME VALUES (
+    5,
+    5
+);
+
+INSERT INTO LOCATII VALUES (
+    1,
+    'Romania',
+    'Bucuresti',
+    'Calea Vacaresti',
+    '100575'
+);
+
+INSERT INTO LOCATII VALUES (
+    2,
+    'Romania',
+    'Bucuresti',
+    'Strada Liviu Rebreanu',
+    '410095'
+);
+
+INSERT INTO LOCATII VALUES (
+    3,
+    'Romania',
+    'Bucuresti',
+    'Bulevardul Pierre de Coubertin',
+    '041082'
+);
+
+INSERT INTO LOCATII VALUES (
+    4,
+    'Romania',
+    'Bucuresti',
+    'Bulevardul Doina Cornea',
+    '450043'
+);
+
+INSERT INTO LOCATII VALUES (
+    5,
+    'Romania',
+    'Bucuresti',
+    'Bulevardul 1 Decembrie 1918',
+    '330088'
+);
+
+INSERT INTO CINEMATOGRAFE VALUES (
+    1,
+    1,
+    'Cinema City'
+);
+
+INSERT INTO CINEMATOGRAFE VALUES (
+    2,
+    2,
+    'Cinema City'
+);
+
+INSERT INTO CINEMATOGRAFE VALUES (
+    3,
+    3,
+    'Cinema City'
+);
+
+INSERT INTO CINEMATOGRAFE VALUES (
+    4,
+    4,
+    'Cinema City'
+);
+
+INSERT INTO CINEMATOGRAFE VALUES (
+    5,
+    4,
+    'IMAX'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    1,
+    NULL,
+    'Karly',
+    'Bush'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    2,
+    1,
+    'Dante',
+    'Brien'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    3,
+    1,
+    'Bertha',
+    'Poole'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    4,
+    1,
+    'Deacon',
+    'Herrera'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    5,
+    NULL,
+    'Rama',
+    'Taylor'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    6,
+    5,
+    'Jolie',
+    'Mooney'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    7,
+    5,
+    'Dale',
+    'Munoz'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    8,
+    5,
+    'Raymond',
+    'Atkinson'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    9,
+    NULL,
+    'Kylee',
+    'Puckett'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    10,
+    9,
+    'Raymond',
+    'Hudson'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    11,
+    9,
+    'Ingrid',
+    'Grant'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    12,
+    9,
+    'Maile',
+    'Ramirez'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    13,
+    NULL,
+    'Zorita',
+    'Morris'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    14,
+    13,
+    'Halee',
+    'Houston'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    15,
+    13,
+    'Winifred',
+    'Rush'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    16,
+    13,
+    'Anastasia',
+    'Ewing'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    17,
+    NULL,
+    'Lance',
+    'Sosa'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    18,
+    17,
+    'Tarik',
+    'Valdez'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    19,
+    17,
+    'Yoko',
+    'Newton'
+);
+
+INSERT INTO ANGAJATI VALUES (
+    20,
+    17,
+    'Cleo',
+    'Rose'
+);
+
+INSERT INTO POSTURI VALUES (
+    1,
+    1,
+    1,
+    TO_DATE('2023/04/11', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    2,
+    2,
+    1,
+    TO_DATE('2023/12/23', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    3,
+    3,
+    1,
+    TO_DATE('2024/10/20', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    4,
+    4,
+    1,
+    TO_DATE('2023/09/26', 'yyyy/mm/dd'),
+    TO_DATE('2025/09/26', 'yyyy/mm/dd')
+);
+
+INSERT INTO POSTURI VALUES (
+    5,
+    5,
+    2,
+    TO_DATE('2024/08/13', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    6,
+    6,
+    2,
+    TO_DATE('2022/09/22', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    7,
+    7,
+    2,
+    TO_DATE('2023/09/23', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    8,
+    8,
+    2,
+    TO_DATE('2023/01/17', 'yyyy/mm/dd'),
+    TO_DATE('2025/01/17', 'yyyy/mm/dd')
+);
+
+INSERT INTO POSTURI VALUES (
+    9,
+    9,
+    3,
+    TO_DATE('2023/10/29', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    10,
+    10,
+    3,
+    TO_DATE('2023/08/05', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    11,
+    11,
+    3,
+    TO_DATE('2024/10/14', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    12,
+    12,
+    3,
+    TO_DATE('2024/06/02', 'yyyy/mm/dd'),
+    TO_DATE('2024/06/02', 'yyyy/mm/dd')
+);
+
+INSERT INTO POSTURI VALUES (
+    13,
+    13,
+    4,
+    TO_DATE('2023/11/27', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    14,
+    14,
+    4,
+    TO_DATE('2022/05/22', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    15,
+    15,
+    4,
+    TO_DATE('2023/01/06', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    16,
+    16,
+    4,
+    TO_DATE('2022/12/01', 'yyyy/mm/dd'),
+    TO_DATE('2025/12/01', 'yyyy/mm/dd')
+);
+
+INSERT INTO POSTURI VALUES (
+    17,
+    17,
+    5,
+    TO_DATE('2021/11/29', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    18,
+    18,
+    5,
+    TO_DATE('2024/08/28', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    19,
+    19,
+    5,
+    TO_DATE('2021/11/29', 'yyyy/mm/dd'),
+    NULL
+);
+
+INSERT INTO POSTURI VALUES (
+    20,
+    20,
+    5,
+    TO_DATE('2024/8/28', 'yyyy/mm/dd'),
+    TO_DATE('2025/8/28', 'yyyy/mm/dd')
+);
+
+INSERT INTO SALI VALUES (
+    1,
+    1,
+    'Londra'
+);
+
+INSERT INTO SALI VALUES (
+    2,
+    1,
+    'Syndey'
+);
+
+INSERT INTO SALI VALUES (
+    3,
+    1,
+    'Ankara'
+);
+
+INSERT INTO SALI VALUES (
+    4,
+    2,
+    'Beijing'
+);
+
+INSERT INTO SALI VALUES (
+    5,
+    2,
+    'Cairo'
+);
+
+INSERT INTO SALI VALUES (
+    6,
+    2,
+    'Ottawa'
+);
+
+INSERT INTO SALI VALUES (
+    7,
+    3,
+    'Moscova'
+);
+
+INSERT INTO SALI VALUES (
+    8,
+    3,
+    'Lima'
+);
+
+INSERT INTO SALI VALUES (
+    9,
+    3,
+    'Bangkok'
+);
+
+INSERT INTO SALI VALUES (
+    10,
+    4,
+    'Berlin'
+);
+
+INSERT INTO SALI VALUES (
+    11,
+    4,
+    'Seoul'
+);
+
+INSERT INTO SALI VALUES (
+    12,
+    4,
+    'Madrid'
+);
+
+INSERT INTO SALI VALUES (
+    13,
+    5,
+    'Sofia'
+);
+
+INSERT INTO SALI VALUES (
+    14,
+    5,
+    'Paris'
+);
+
+INSERT INTO SALI VALUES (
+    15,
+    5,
+    'Varsovia'
+);
+
+INSERT INTO DIFUZARI VALUES (
+    1,
+    10,
+    1,
+    TO_DATE('2025/09/20', 'yyyy/mm/dd'),
+    16
+);
+
+INSERT INTO DIFUZARI VALUES (
+    2,
+    8,
+    4,
+    TO_DATE('2025/09/5', 'yyyy/mm/dd'),
+    31
+);
+
+INSERT INTO DIFUZARI VALUES (
+    3,
+    1,
+    5,
+    TO_DATE('2025/09/1', 'yyyy/mm/dd'),
+    18
+);
+
+INSERT INTO DIFUZARI VALUES (
+    4,
+    2,
+    1,
+    TO_DATE('2025/09/11', 'yyyy/mm/dd'),
+    21
+);
+
+INSERT INTO DIFUZARI VALUES (
+    5,
+    8,
+    4,
+    TO_DATE('2025/09/8', 'yyyy/mm/dd'),
+    23
+);
+
+INSERT INTO DIFUZARI VALUES (
+    6,
+    4,
+    1,
+    TO_DATE('2025/09/15', 'yyyy/mm/dd'),
+    20
+);
+
+INSERT INTO DIFUZARI VALUES (
+    7,
+    13,
+    1,
+    TO_DATE('2025/09/5', 'yyyy/mm/dd'),
+    31
+);
+
+INSERT INTO DIFUZARI VALUES (
+    8,
+    10,
+    2,
+    TO_DATE('2025/09/21', 'yyyy/mm/dd'),
+    35
+);
+
+INSERT INTO DIFUZARI VALUES (
+    9,
+    11,
+    2,
+    TO_DATE('2025/09/1', 'yyyy/mm/dd'),
+    35
+);
+
+INSERT INTO DIFUZARI VALUES (
+    10,
+    14,
+    5,
+    TO_DATE('2025/09/27', 'yyyy/mm/dd'),
+    30
+);
+
+INSERT INTO DIFUZARI VALUES (
+    11,
+    6,
+    1,
+    TO_DATE('2025/09/12', 'yyyy/mm/dd'),
+    24
+);
+
+INSERT INTO DIFUZARI VALUES (
+    12,
+    13,
+    4,
+    TO_DATE('2025/09/7', 'yyyy/mm/dd'),
+    31
+);
+
+INSERT INTO DIFUZARI VALUES (
+    13,
+    14,
+    4,
+    TO_DATE('2025/09/3', 'yyyy/mm/dd'),
+    28
+);
+
+INSERT INTO DIFUZARI VALUES (
+    14,
+    8,
+    1,
+    TO_DATE('2025/09/9', 'yyyy/mm/dd'),
+    29
+);
+
+INSERT INTO DIFUZARI VALUES (
+    15,
+    9,
+    1,
+    TO_DATE('2025/09/7', 'yyyy/mm/dd'),
+    33
+);
+
+INSERT INTO DIFUZARI VALUES (
+    16,
+    3,
+    2,
+    TO_DATE('2025/09/21', 'yyyy/mm/dd'),
+    23
+);
+
+INSERT INTO DIFUZARI VALUES (
+    17,
+    2,
+    4,
+    TO_DATE('2025/09/28', 'yyyy/mm/dd'),
+    20
+);
+
+INSERT INTO DIFUZARI VALUES (
+    18,
+    11,
+    5,
+    TO_DATE('2025/09/23', 'yyyy/mm/dd'),
+    27
+);
+
+INSERT INTO DIFUZARI VALUES (
+    19,
+    1,
+    1,
+    TO_DATE('2025/09/27', 'yyyy/mm/dd'),
+    20
+);
+
+INSERT INTO DIFUZARI VALUES (
+    20,
+    6,
+    5,
+    TO_DATE('2025/09/23', 'yyyy/mm/dd'),
+    21
+);
+
+INSERT INTO DIFUZARI VALUES (
+    21,
+    12,
+    3,
+    TO_DATE('2025/09/9', 'yyyy/mm/dd'),
+    29
+);
+
+INSERT INTO DIFUZARI VALUES (
+    22,
+    8,
+    1,
+    TO_DATE('2025/09/27', 'yyyy/mm/dd'),
+    20
+);
+
+INSERT INTO DIFUZARI VALUES (
+    23,
+    1,
+    5,
+    TO_DATE('2025/09/30', 'yyyy/mm/dd'),
+    24
+);
+
+INSERT INTO DIFUZARI VALUES (
+    24,
+    1,
+    1,
+    TO_DATE('2025/09/1', 'yyyy/mm/dd'),
+    28
+);
+
+INSERT INTO DIFUZARI VALUES (
+    25,
+    8,
+    1,
+    TO_DATE('2025/09/27', 'yyyy/mm/dd'),
+    22
+);
+
+INSERT INTO DIFUZARI VALUES (
+    26,
+    10,
+    2,
+    TO_DATE('2025/09/18', 'yyyy/mm/dd'),
+    18
+);
+
+INSERT INTO DIFUZARI VALUES (
+    27,
+    7,
+    2,
+    TO_DATE('2025/09/10', 'yyyy/mm/dd'),
+    18
+);
+
+INSERT INTO DIFUZARI VALUES (
+    28,
+    9,
+    1,
+    TO_DATE('2025/09/25', 'yyyy/mm/dd'),
+    15
+);
+
+INSERT INTO DIFUZARI VALUES (
+    29,
+    12,
+    5,
+    TO_DATE('2025/09/4', 'yyyy/mm/dd'),
+    31
+);
+
+INSERT INTO DIFUZARI VALUES (
+    30,
+    2,
+    2,
+    TO_DATE('2025/09/16', 'yyyy/mm/dd'),
+    21
+);
+
+INSERT INTO DIFUZARI VALUES (
+    31,
+    12,
+    2,
+    TO_DATE('2025/09/28', 'yyyy/mm/dd'),
+    22
+);
+
+INSERT INTO DIFUZARI VALUES (
+    32,
+    10,
+    4,
+    TO_DATE('2025/09/10', 'yyyy/mm/dd'),
+    32
+);
+
+INSERT INTO DIFUZARI VALUES (
+    33,
+    7,
+    3,
+    TO_DATE('2025/09/6', 'yyyy/mm/dd'),
+    24
+);
+
+INSERT INTO DIFUZARI VALUES (
+    34,
+    12,
+    4,
+    TO_DATE('2025/09/8', 'yyyy/mm/dd'),
+    27
+);
+
+INSERT INTO DIFUZARI VALUES (
+    35,
+    10,
+    4,
+    TO_DATE('2025/09/4', 'yyyy/mm/dd'),
+    17
+);
+
+INSERT INTO DIFUZARI VALUES (
+    36,
+    13,
+    5,
+    TO_DATE('2025/09/1', 'yyyy/mm/dd'),
+    20
+);
+
+INSERT INTO DIFUZARI VALUES (
+    37,
+    9,
+    2,
+    TO_DATE('2025/09/21', 'yyyy/mm/dd'),
+    22
+);
+
+INSERT INTO DIFUZARI VALUES (
+    38,
+    14,
+    4,
+    TO_DATE('2025/09/1', 'yyyy/mm/dd'),
+    24
+);
+
+INSERT INTO DIFUZARI VALUES (
+    39,
+    12,
+    4,
+    TO_DATE('2025/09/7', 'yyyy/mm/dd'),
+    24
+);
+
+INSERT INTO DIFUZARI VALUES (
+    40,
+    14,
+    5,
+    TO_DATE('2025/09/4', 'yyyy/mm/dd'),
+    15
+);
+
+INSERT INTO DIFUZARI VALUES (
+    41,
+    7,
+    2,
+    TO_DATE('2025/09/13', 'yyyy/mm/dd'),
+    26
+);
+
+INSERT INTO DIFUZARI VALUES (
+    42,
+    12,
+    4,
+    TO_DATE('2025/09/13', 'yyyy/mm/dd'),
+    23
+);
+
+INSERT INTO DIFUZARI VALUES (
+    43,
+    5,
+    2,
+    TO_DATE('2025/09/17', 'yyyy/mm/dd'),
+    33
+);
+
+INSERT INTO DIFUZARI VALUES (
+    44,
+    11,
+    3,
+    TO_DATE('2025/09/5', 'yyyy/mm/dd'),
+    35
+);
+
+INSERT INTO DIFUZARI VALUES (
+    45,
+    9,
+    3,
+    TO_DATE('2025/09/16', 'yyyy/mm/dd'),
+    34
+);
+
+INSERT INTO DIFUZARI VALUES (
+    46,
+    8,
+    2,
+    TO_DATE('2025/09/13', 'yyyy/mm/dd'),
+    22
+);
+
+INSERT INTO DIFUZARI VALUES (
+    47,
+    10,
+    4,
+    TO_DATE('2025/09/13', 'yyyy/mm/dd'),
+    20
+);
+
+INSERT INTO DIFUZARI VALUES (
+    48,
+    13,
+    1,
+    TO_DATE('2025/09/24', 'yyyy/mm/dd'),
+    23
+);
+
+INSERT INTO DIFUZARI VALUES (
+    49,
+    3,
+    3,
+    TO_DATE('2025/09/3', 'yyyy/mm/dd'),
+    20
+);
+
+INSERT INTO DIFUZARI VALUES (
+    50,
+    11,
+    2,
+    TO_DATE('2025/09/23', 'yyyy/mm/dd'),
+    27
+);
+
+INSERT INTO CLIENTI VALUES (
+    1,
+    'Yuli',
+    'Pruitt',
+    'donec.elementum@outlook.com',
+    '+40758768308'
+);
+
+INSERT INTO CLIENTI VALUES (
+    2,
+    'Abra',
+    'Adkins',
+    'scelerisque.neque@icloud.com',
+    '+40755268230'
+);
+
+INSERT INTO CLIENTI VALUES (
+    3,
+    'James',
+    'Schneider',
+    'urna.suscipit@protonmail.ca',
+    '+40717954725'
+);
+
+INSERT INTO CLIENTI VALUES (
+    4,
+    'Kellie',
+    'Mcgowan',
+    'magna@yahoo.com',
+    '+40712564297'
+);
+
+INSERT INTO CLIENTI VALUES (
+    5,
+    'Callum',
+    'Mercado',
+    'ac@hotmail.couk',
+    '+40764531440'
+);
+
+INSERT INTO CLIENTI VALUES (
+    6,
+    'Indigo',
+    'Gay',
+    'lacus.cras@outlook.org',
+    '+40747540129'
+);
+
+INSERT INTO CLIENTI VALUES (
+    7,
+    'Emery',
+    'Delgado',
+    'velit.egestas.lacinia@google.ca',
+    '+40736986198'
+);
+
+INSERT INTO CLIENTI VALUES (
+    8,
+    'Aimee',
+    'Barnes',
+    'aliquam.ornare@protonmail.edu',
+    '+40710863075'
+);
+
+INSERT INTO CLIENTI VALUES (
+    9,
+    'Nicole',
+    'Cox',
+    'eleifend.cras.sed@yahoo.ca',
+    '+40731160680'
+);
+
+INSERT INTO CLIENTI VALUES (
+    10,
+    'Michelle',
+    'Haley',
+    'magna.ut@hotmail.net',
+    '+40753547175'
+);
+
+INSERT INTO CLIENTI VALUES (
+    11,
+    'Jack',
+    'Rodriguez',
+    'cursus@protonmail.net',
+    '+40784139038'
+);
+
+INSERT INTO CLIENTI VALUES (
+    12,
+    'Alice',
+    'Francis',
+    'et.magnis.dis@protonmail.com',
+    '+40786644439'
+);
+
+INSERT INTO CLIENTI VALUES (
+    13,
+    'Kuame',
+    'Bowers',
+    'blandit.mattis@yahoo.couk',
+    '+40703022781'
+);
+
+INSERT INTO CLIENTI VALUES (
+    14,
+    'Zelenia',
+    'Baird',
+    'enim.gravida.sit@outlook.org',
+    '+40724766722'
+);
+
+INSERT INTO CLIENTI VALUES (
+    15,
+    'Jacob',
+    'Burks',
+    'nisi.aenean.eget@google.ca',
+    '+40713368272'
+);
+
+INSERT INTO CLIENTI VALUES (
+    16,
+    'Quintessa',
+    'Jenkins',
+    'parturient.montes.nascetur@icloud.org',
+    '+40756782126'
+);
+
+INSERT INTO CLIENTI VALUES (
+    17,
+    'Simon',
+    'Grant',
+    'mi.lorem.vehicula@aol.ca',
+    '+40741312116'
+);
+
+INSERT INTO CLIENTI VALUES (
+    18,
+    'Ainsley',
+    'Klein',
+    'donec.porttitor@yahoo.couk',
+    '+40743829582'
+);
+
+INSERT INTO CLIENTI VALUES (
+    19,
+    'Ahmed',
+    'Richards',
+    'odio.tristique@protonmail.com',
+    '+40705621229'
+);
+
+INSERT INTO CLIENTI VALUES (
+    20,
+    'Kiayada',
+    'Hickman',
+    'erat.vivamus@aol.couk',
+    '+40778627852'
+);
+
+INSERT INTO CLIENTI VALUES (
+    21,
+    'Kermit',
+    'Vinson',
+    'semper.rutrum@icloud.org',
+    '+40776584532'
+);
+
+INSERT INTO CLIENTI VALUES (
+    22,
+    'Urielle',
+    'Casey',
+    'donec@protonmail.edu',
+    '+40756359226'
+);
+
+INSERT INTO CLIENTI VALUES (
+    23,
+    'Dennis',
+    'Hoover',
+    'dis.parturient.montes@hotmail.edu',
+    '+40788253227'
+);
+
+INSERT INTO CLIENTI VALUES (
+    24,
+    'Allistair',
+    'Pate',
+    'ut.mi@protonmail.net',
+    '+40781658326'
+);
+
+INSERT INTO CLIENTI VALUES (
+    25,
+    'Tucker',
+    'Foster',
+    'sed.dolor.fusce@outlook.com',
+    '+40778668913'
+);
+
+INSERT INTO CLIENTI VALUES (
+    26,
+    'Sasha',
+    'Dillard',
+    'integer.sem@google.com',
+    '+40784986874'
+);
+
+INSERT INTO CLIENTI VALUES (
+    27,
+    'Barclay',
+    'Tillman',
+    'felis.purus@google.org',
+    '+40720635786'
+);
+
+INSERT INTO CLIENTI VALUES (
+    28,
+    'Chastity',
+    'Guthrie',
+    'ultrices.sit@google.com',
+    '+40772921276'
+);
+
+INSERT INTO CLIENTI VALUES (
+    29,
+    'Kato',
+    'Mckinney',
+    'convallis.convallis.dolor@yahoo.com',
+    '+40746644650'
+);
+
+INSERT INTO CLIENTI VALUES (
+    30,
+    'Rogan',
+    'Stark',
+    'in.mi@yahoo.ca',
+    '+40777656596'
+);
+
+INSERT INTO CLIENTI VALUES (
+    31,
+    'Nell',
+    'Owens',
+    'dapibus.quam@outlook.couk',
+    '+40783261285'
+);
+
+INSERT INTO CLIENTI VALUES (
+    32,
+    'Ebony',
+    'Hale',
+    'donec.vitae@aol.org',
+    '+40743321578'
+);
+
+INSERT INTO CLIENTI VALUES (
+    33,
+    'Willa',
+    'Klein',
+    'dolor.elit@hotmail.com',
+    '+40714674918'
+);
+
+INSERT INTO CLIENTI VALUES (
+    34,
+    'Isabelle',
+    'Watkins',
+    'et.ipsum@icloud.ca',
+    '+40783488866'
+);
+
+INSERT INTO CLIENTI VALUES (
+    35,
+    'Melinda',
+    'Giles',
+    'scelerisque.neque@icloud.couk',
+    '+40757857016'
+);
+
+INSERT INTO CLIENTI VALUES (
+    36,
+    'Joseph',
+    'Cannon',
+    'ipsum.non@protonmail.couk',
+    '+40734935878'
+);
+
+INSERT INTO CLIENTI VALUES (
+    37,
+    'Paul',
+    'Kaufman',
+    'elit.sed@yahoo.net',
+    '+40734445756'
+);
+
+INSERT INTO CLIENTI VALUES (
+    38,
+    'Henry',
+    'Green',
+    'tristique.pharetra.quisque@google.org',
+    '+40718367721'
+);
+
+INSERT INTO CLIENTI VALUES (
+    39,
+    'Cameron',
+    'Vega',
+    'praesent.luctus@protonmail.ca',
+    '+40706568186'
+);
+
+INSERT INTO CLIENTI VALUES (
+    40,
+    'Omar',
+    'Carter',
+    'cras.lorem.lorem@yahoo.net',
+    '+40715832304'
+);
+
+INSERT INTO CLIENTI VALUES (
+    41,
+    'Jerome',
+    'Doyle',
+    'ut.odio.vel@outlook.com',
+    '+40766825917'
+);
+
+INSERT INTO CLIENTI VALUES (
+    42,
+    'Odessa',
+    'Mendoza',
+    'a.nunc@yahoo.edu',
+    '+40722547934'
+);
+
+INSERT INTO CLIENTI VALUES (
+    43,
+    'Thaddeus',
+    'Mack',
+    'nisi.nibh@aol.org',
+    '+40774956357'
+);
+
+INSERT INTO CLIENTI VALUES (
+    44,
+    'Wyatt',
+    'Blackburn',
+    'praesent.interdum.ligula@yahoo.com',
+    '+40762596159'
+);
+
+INSERT INTO CLIENTI VALUES (
+    45,
+    'Adam',
+    'Jennings',
+    'molestie.orci.tincidunt@outlook.ca',
+    '+40756424464'
+);
+
+INSERT INTO CLIENTI VALUES (
+    46,
+    'Lara',
+    'Kramer',
+    'proin.ultrices.duis@hotmail.ca',
+    '+40708662777'
+);
+
+INSERT INTO CLIENTI VALUES (
+    47,
+    'Natalie',
+    'Reyes',
+    'laoreet.posuere@protonmail.com',
+    '+40785532322'
+);
+
+INSERT INTO CLIENTI VALUES (
+    48,
+    'Macaulay',
+    'Humphrey',
+    'interdum.feugiat.sed@yahoo.org',
+    '+40777568211'
+);
+
+INSERT INTO CLIENTI VALUES (
+    49,
+    'Aurelia',
+    'Avila',
+    'id.enim@protonmail.couk',
+    '+40785768536'
+);
+
+INSERT INTO CLIENTI VALUES (
+    50,
+    'Skyler',
+    'Burt',
+    'nunc@hotmail.net',
+    '+40786685345'
+);
+
+INSERT INTO CLIENTI VALUES (
+    51,
+    'Rogan',
+    'Neal',
+    'dolor@icloud.edu',
+    '+40705844348'
+);
+
+INSERT INTO CLIENTI VALUES (
+    52,
+    'Flynn',
+    'Gordon',
+    'sed.pede.cum@aol.ca',
+    '+40732577924'
+);
+
+INSERT INTO CLIENTI VALUES (
+    53,
+    'Jenette',
+    'Weiss',
+    'risus.donec@protonmail.ca',
+    '+40733318216'
+);
+
+INSERT INTO CLIENTI VALUES (
+    54,
+    'Evan',
+    'Burton',
+    'egestas@protonmail.net',
+    '+40724479622'
+);
+
+INSERT INTO CLIENTI VALUES (
+    55,
+    'Craig',
+    'Berry',
+    'enim.condimentum@aol.org',
+    '+40772690573'
+);
+
+INSERT INTO CLIENTI VALUES (
+    56,
+    'Rhiannon',
+    'Chambers',
+    'lacus.ut@google.org',
+    '+40736321124'
+);
+
+INSERT INTO CLIENTI VALUES (
+    57,
+    'Charles',
+    'Lyons',
+    'cras.interdum.nunc@icloud.com',
+    '+40714375233'
+);
+
+INSERT INTO CLIENTI VALUES (
+    58,
+    'Bruce',
+    'Wilkinson',
+    'dapibus@hotmail.net',
+    '+40778212516'
+);
+
+INSERT INTO CLIENTI VALUES (
+    59,
+    'Asher',
+    'Pickett',
+    'at.risus@yahoo.net',
+    '+40725846393'
+);
+
+INSERT INTO CLIENTI VALUES (
+    60,
+    'Xyla',
+    'Gamble',
+    'turpis.nulla@hotmail.net',
+    '+40757112489'
+);
+
+INSERT INTO CLIENTI VALUES (
+    61,
+    'Hayfa',
+    'Le',
+    'eget.lacus.mauris@google.ca',
+    '+40794305574'
+);
+
+INSERT INTO CLIENTI VALUES (
+    62,
+    'Adrian',
+    'Nielsen',
+    'risus.nulla@google.edu',
+    '+40792772677'
+);
+
+INSERT INTO CLIENTI VALUES (
+    63,
+    'Dustin',
+    'Burns',
+    'lorem.vehicula.et@outlook.net',
+    '+40741812616'
+);
+
+INSERT INTO CLIENTI VALUES (
+    64,
+    'Ifeoma',
+    'Beach',
+    'eu@yahoo.org',
+    '+40713193251'
+);
+
+INSERT INTO CLIENTI VALUES (
+    65,
+    'Stuart',
+    'Clarke',
+    'malesuada@aol.com',
+    '+40763515534'
+);
+
+INSERT INTO CLIENTI VALUES (
+    66,
+    'Isadora',
+    'Mccullough',
+    'curae.phasellus@yahoo.edu',
+    '+40738311611'
+);
+
+INSERT INTO CLIENTI VALUES (
+    67,
+    'Melyssa',
+    'Sears',
+    'odio.etiam@aol.net',
+    '+40726668251'
+);
+
+INSERT INTO CLIENTI VALUES (
+    68,
+    'Wendy',
+    'Goodwin',
+    'sed@outlook.com',
+    '+40772325312'
+);
+
+INSERT INTO CLIENTI VALUES (
+    69,
+    'Sydney',
+    'Foreman',
+    'eu.eros@hotmail.org',
+    '+40718557612'
+);
+
+INSERT INTO CLIENTI VALUES (
+    70,
+    'Venus',
+    'Atkinson',
+    'nunc.est@icloud.ca',
+    '+40738262437'
+);
+
+INSERT INTO CLIENTI VALUES (
+    71,
+    'Rhonda',
+    'Slater',
+    'duis.at@hotmail.couk',
+    '+40728892666'
+);
+
+INSERT INTO CLIENTI VALUES (
+    72,
+    'Xantha',
+    'Greer',
+    'ac.ipsum.phasellus@aol.edu',
+    '+40771728282'
+);
+
+INSERT INTO CLIENTI VALUES (
+    73,
+    'Pearl',
+    'Bowen',
+    'congue.elit@icloud.ca',
+    '+40736220754'
+);
+
+INSERT INTO CLIENTI VALUES (
+    74,
+    'Ayanna',
+    'Soto',
+    'libero.est@hotmail.org',
+    '+40727461815'
+);
+
+INSERT INTO CLIENTI VALUES (
+    75,
+    'Amber',
+    'Huff',
+    'egestas.fusce@aol.couk',
+    '+40797767237'
+);
+
+INSERT INTO CLIENTI VALUES (
+    76,
+    'Jelani',
+    'Weiss',
+    'turpis.nulla@hotmail.couk',
+    '+40797163779'
+);
+
+INSERT INTO CLIENTI VALUES (
+    77,
+    'Brynn',
+    'Figueroa',
+    'etiam.gravida@aol.net',
+    '+40766627418'
+);
+
+INSERT INTO CLIENTI VALUES (
+    78,
+    'Raphael',
+    'Bailey',
+    'vitae@hotmail.ca',
+    '+40782898695'
+);
+
+INSERT INTO CLIENTI VALUES (
+    79,
+    'Colt',
+    'Burt',
+    'consectetuer.rhoncus@protonmail.edu',
+    '+40714335364'
+);
+
+INSERT INTO CLIENTI VALUES (
+    80,
+    'Garrett',
+    'Lawrence',
+    'vivamus@outlook.org',
+    '+40745671926'
+);
+
+INSERT INTO CLIENTI VALUES (
+    81,
+    'Brody',
+    'Flores',
+    'molestie.tortor@aol.couk',
+    '+40738893921'
+);
+
+INSERT INTO CLIENTI VALUES (
+    82,
+    'Alfonso',
+    'Burt',
+    'aenean.euismod.mauris@aol.com',
+    '+40715365135'
+);
+
+INSERT INTO CLIENTI VALUES (
+    83,
+    'Sydnee',
+    'Everett',
+    'lorem.sit@protonmail.edu',
+    '+40784176453'
+);
+
+INSERT INTO CLIENTI VALUES (
+    84,
+    'Ella',
+    'Gutierrez',
+    'arcu@protonmail.edu',
+    '+40701122957'
+);
+
+INSERT INTO CLIENTI VALUES (
+    85,
+    'Keith',
+    'Floyd',
+    'dictum.magna@outlook.org',
+    '+40781133729'
+);
+
+INSERT INTO CLIENTI VALUES (
+    86,
+    'Ashton',
+    'Horne',
+    'ullamcorper.eu.euismod@aol.net',
+    '+40776174643'
+);
+
+INSERT INTO CLIENTI VALUES (
+    87,
+    'Tobias',
+    'Schwartz',
+    'nunc.pulvinar@google.ca',
+    '+40795878248'
+);
+
+INSERT INTO CLIENTI VALUES (
+    88,
+    'Fleur',
+    'Bray',
+    'rutrum.lorem@yahoo.edu',
+    '+40737433604'
+);
+
+INSERT INTO CLIENTI VALUES (
+    89,
+    'Dominique',
+    'Whitley',
+    'lectus.cum@protonmail.couk',
+    '+40725015143'
+);
+
+INSERT INTO CLIENTI VALUES (
+    90,
+    'Nyssa',
+    'Montoya',
+    'dapibus.rutrum@yahoo.org',
+    '+40739570986'
+);
+
+INSERT INTO CLIENTI VALUES (
+    91,
+    'Lewis',
+    'Patton',
+    'egestas.lacinia.sed@icloud.edu',
+    '+40714486851'
+);
+
+INSERT INTO CLIENTI VALUES (
+    92,
+    'Dieter',
+    'Saunders',
+    'libero.proin.mi@icloud.com',
+    '+40711612286'
+);
+
+INSERT INTO CLIENTI VALUES (
+    93,
+    'David',
+    'Collier',
+    'class.aptent@protonmail.edu',
+    '+40716767315'
+);
+
+INSERT INTO CLIENTI VALUES (
+    94,
+    'Judah',
+    'Carson',
+    'congue.turpis@google.couk',
+    '+40778666149'
+);
+
+INSERT INTO CLIENTI VALUES (
+    95,
+    'Keiko',
+    'Melton',
+    'neque.in@google.net',
+    '+40786480086'
+);
+
+INSERT INTO CLIENTI VALUES (
+    96,
+    'Samuel',
+    'Crosby',
+    'amet.ultricies.sem@aol.com',
+    '+40793224590'
+);
+
+INSERT INTO CLIENTI VALUES (
+    97,
+    'Liberty',
+    'Fuentes',
+    'congue@google.ca',
+    '+40766379721'
+);
+
+INSERT INTO CLIENTI VALUES (
+    98,
+    'Kylynn',
+    'Santos',
+    'sed.facilisis@protonmail.com',
+    '+40702743184'
+);
+
+INSERT INTO CLIENTI VALUES (
+    99,
+    'Emery',
+    'Wilkerson',
+    'erat.nonummy@outlook.couk',
+    '+40758242443'
+);
+
+INSERT INTO CLIENTI VALUES (
+    100,
+    'Echo',
+    'Cohen',
+    'a.aliquet@google.net',
+    '+40735244327'
+);
+
+CREATE OR REPLACE PROCEDURE GENERARE_REZERVARE_PENTRU_CLIENT (
+    ID_CLIENT_PARAM IN CLIENTI.ID_CLIENT%TYPE
+) AS
+    ID_DIFUZARE_GENERAT DIFUZARI.ID_DIFUZARE%TYPE;
+    DIFUZARE            DIFUZARI%ROWTYPE;
+    ID_LOC              LOCURI.ID_LOC%TYPE;
+    ZI_REZERVARE        NUMBER(10);
+BEGIN
+    ID_DIFUZARE_GENERAT := ROUND(DBMS_RANDOM.VALUE(1, 50));
+    SELECT
+        * INTO DIFUZARE
+    FROM
+        DIFUZARI D
+    WHERE
+        D.ID_DIFUZARE = ID_DIFUZARE_GENERAT;
+    ID_LOC := ROUND(DBMS_RANDOM.VALUE(1, 30));
+    ID_LOC := ID_LOC + (DIFUZARE.ID_SALA - 1) * 30;
+    ZI_REZERVARE := ROUND(DBMS_RANDOM.VALUE(1, TO_NUMBER(TO_CHAR(DIFUZARE.DATA, 'dd'))));
+    INSERT INTO REZERVARI VALUES (
+        ID_LOC,
+        DIFUZARE.ID_DIFUZARE,
+        ID_CLIENT_PARAM,
+        TO_DATE('2025/09/'
+                || ZI_REZERVARE, 'yyyy/mm/dd')
+    );
+END GENERARE_REZERVARE_PENTRU_CLIENT;
+/
+
+CREATE OR REPLACE FUNCTION LOC_ALEATOR_LA_DIFUZARE (
+    ID_DIFUZARE_PARAM IN DIFUZARI.ID_DIFUZARE%TYPE
+) RETURN LOCURI.ID_LOC%TYPE IS
+    ID_LOC LOCURI.ID_LOC%TYPE;
+BEGIN
+    SELECT
+        D.ID_SALA INTO ID_LOC
+    FROM
+        DIFUZARI D
+    WHERE
+        D.ID_DIFUZARE = ID_DIFUZARE_PARAM;
+    ID_LOC := (ID_LOC - 1) * 30 + DBMS_RANDOM.VALUE(1, 30);
+    RETURN ID_LOC;
+END LOC_ALEATOR_LA_DIFUZARE;
+/
+
+DECLARE
+    LOCURI_PER_SALA          NUMBER(10) := 30;
+    REZERVARI_PER_CLIENT_MAX NUMBER(10) := 5;
+    REZERVARI_PER_CLIENT     NUMBER(10);
+    ZI_REZERVARE             NUMBER(10);
+    ID_LOC                   LOCURI.ID_LOC%TYPE;
+    COD_LOC                  LOCURI.COD%TYPE;
+    ID_DIFUZARE_REZERVARE    REZERVARI.ID_DIFUZARE%TYPE;
+    ID_SALA_REZERVARE        DIFUZARI.ID_SALA%TYPE;
+    ID_LOC_REZERVARE         REZERVARI.ID_LOC%TYPE;
+    QUERY_INSERT_REZERVARE   VARCHAR2(255);
+    QUERY_INSERT_LOC         VARCHAR2(255);
+BEGIN
+    FOR DATE_SALA IN (
+        SELECT
+            *
+        FROM
+            SALI
+    ) LOOP
+        FOR INDEX_LOC IN 1..LOCURI_PER_SALA LOOP
+            COD_LOC := 'LOC-'
+                       || DATE_SALA.ID_SALA
+                       || '-'
+                       || INDEX_LOC;
+            ID_LOC := (DATE_SALA.ID_SALA - 1) * LOCURI_PER_SALA + INDEX_LOC;
+            QUERY_INSERT_LOC := 'INSERT INTO LOCURI VALUES('
+                                || ID_LOC
+                                || ','
+                                || DATE_SALA.ID_SALA
+                                || ','''
+                                || COD_LOC
+                                || ''')';
+            BEGIN
+                EXECUTE IMMEDIATE QUERY_INSERT_LOC;
+            EXCEPTION
+                WHEN OTHERS THEN
+                    DBMS_OUTPUT.PUT_LINE('Se incearca inserarea unui loc invalid. Sarim peste.');
+            END;
+        END LOOP;
+    END LOOP;
+
+    FOR DATE_CLIENT IN (
+        SELECT
+            *
+        FROM
+            CLIENTI
+    ) LOOP
+        REZERVARI_PER_CLIENT := ROUND(DBMS_RANDOM.VALUE(1, REZERVARI_PER_CLIENT_MAX));
+        FOR INDEX_REZERVARE IN 1..REZERVARI_PER_CLIENT LOOP
+            BEGIN
+                GENERARE_REZERVARE_PENTRU_CLIENT(DATE_CLIENT.ID_CLIENT);
+            EXCEPTION
+                WHEN OTHERS THEN
+                    DBMS_OUTPUT.PUT_LINE('Se incearca inserarea unei rezervari invalide. Sarim peste.');
+            END;
+        END LOOP;
+    END LOOP;
+END;
+/
+
+CREATE TYPE LISTA_CODURI_LOCURI IS
+    VARRAY(20) OF VARCHAR2(20);
+/
+
+CREATE TYPE REZERVARI_CLIENT_DATE_DIFUZARE IS
+    OBJECT (
+        TITLU_FILM VARCHAR2(255),
+        DATA_DIFUZARE DATE,
+        CODURI_LOCURI LISTA_CODURI_LOCURI
+    )
+/
+
+CREATE TYPE REZERVARI_CLIENT_DATE_DIFUZARI IS
+    TABLE OF REZERVARI_CLIENT_DATE_DIFUZARE;
+/
+
+ALTER TABLE CLIENTI
+    ADD DATE_REZERVARI REZERVARI_CLIENT_DATE_DIFUZARI NESTED TABLE DATE_REZERVARI STORE AS DATE_REZERVARI_TI;
+
+CREATE OR REPLACE FUNCTION REZERVARI_CLIENT (
+    ID_CLIENT_PARAM CLIENTI.ID_CLIENT%TYPE
+) RETURN REZERVARI_CLIENT_DATE_DIFUZARI AS
+    TYPE LOCURI_DIFUZARE IS
+        TABLE OF LISTA_CODURI_LOCURI INDEX BY BINARY_INTEGER;
+    DATE_LOCURI_DIFUZARE     LOCURI_DIFUZARE;
+    DATE_CLIENT              REZERVARI_CLIENT_DATE_DIFUZARI;
+    DATE_LISTA_CODURI_LOCURI LISTA_CODURI_LOCURI;
+BEGIN
+    DATE_CLIENT := REZERVARI_CLIENT_DATE_DIFUZARI();
+    FOR DATE_REZERVARE IN (
+        SELECT
+            R.ID_DIFUZARE,
+            L.COD
+        FROM
+            (
+                SELECT
+                    *
+                FROM
+                    REZERVARI R
+                WHERE
+                    R.ID_CLIENT = ID_CLIENT_PARAM
+            )      R
+            INNER JOIN LOCURI L
+            ON L.ID_LOC = R.ID_LOC
+    ) LOOP
+        BEGIN
+            DATE_LISTA_CODURI_LOCURI := DATE_LOCURI_DIFUZARE(DATE_REZERVARE.ID_DIFUZARE);
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                DATE_LISTA_CODURI_LOCURI := LISTA_CODURI_LOCURI();
+        END;
+
+        DATE_LISTA_CODURI_LOCURI.EXTEND;
+        DATE_LISTA_CODURI_LOCURI(DATE_LISTA_CODURI_LOCURI.COUNT) := DATE_REZERVARE.COD;
+        DATE_LOCURI_DIFUZARE(DATE_REZERVARE.ID_DIFUZARE) := DATE_LISTA_CODURI_LOCURI;
+    END LOOP;
+
+    FOR DATE_DIFUZARE IN (
+        SELECT
+            D.ID_DIFUZARE,
+            D.DATA,
+            F.TITLU
+        FROM
+            (
+                SELECT
+                    R.ID_DIFUZARE
+                FROM
+                    REZERVARI R
+                WHERE
+                    R.ID_CLIENT = ID_CLIENT_PARAM
+                GROUP BY
+                    R.ID_DIFUZARE
+            )        DC
+            INNER JOIN DIFUZARI D
+            ON DC.ID_DIFUZARE = D.ID_DIFUZARE
+            INNER JOIN FILME F
+            ON F.ID_FILM = D.ID_FILM
+    ) LOOP
+        DATE_LISTA_CODURI_LOCURI := DATE_LOCURI_DIFUZARE(DATE_DIFUZARE.ID_DIFUZARE);
+        DATE_CLIENT.EXTEND;
+        DATE_CLIENT(DATE_CLIENT.COUNT) := REZERVARI_CLIENT_DATE_DIFUZARE(DATE_DIFUZARE.TITLU, DATE_DIFUZARE.DATA, DATE_LISTA_CODURI_LOCURI);
+    END LOOP;
+    UPDATE CLIENTI C
+    SET
+        DATE_REZERVARI = DATE_CLIENT
+    WHERE
+        C.ID_CLIENT = ID_CLIENT_PARAM;
+    RETURN DATE_CLIENT;
+END REZERVARI_CLIENT;
+/
+
+DECLARE
+    DATE_CLIENT REZERVARI_CLIENT_DATE_DIFUZARI;
+BEGIN
+    FOR CLIENT IN (
+        SELECT
+            *
+        FROM
+            CLIENTI
+    ) LOOP
+        DATE_CLIENT := REZERVARI_CLIENT(CLIENT.ID_CLIENT);
+    END LOOP;
+END;
+/
+
+DECLARE
+    ID_CLIENT     CLIENTI.ID_CLIENT%TYPE := &ID_CLIENT;
+    DATE_CLIENT   REZERVARI_CLIENT_DATE_DIFUZARI;
+    DATE_DIFUZARE REZERVARI_CLIENT_DATE_DIFUZARE;
+    LISTA_LOCURI  VARCHAR2(255);
+BEGIN
+    DATE_CLIENT := REZERVARI_CLIENT(ID_CLIENT);
+    FOR INDEX_DIFUZARE IN DATE_CLIENT.FIRST..DATE_CLIENT.LAST LOOP
+        DATE_DIFUZARE := DATE_CLIENT(INDEX_DIFUZARE);
+        DBMS_OUTPUT.PUT_LINE('Film: '
+                             || DATE_DIFUZARE.TITLU_FILM);
+        DBMS_OUTPUT.PUT_LINE('Data: '
+                             || TO_CHAR(DATE_DIFUZARE.DATA_DIFUZARE, 'dd.mm.yyyy'));
+        LISTA_LOCURI := '';
+        FOR INDEX_COD_LOC IN DATE_DIFUZARE.CODURI_LOCURI.FIRST..DATE_DIFUZARE.CODURI_LOCURI.LAST LOOP
+            LISTA_LOCURI := LISTA_LOCURI
+                            || DATE_DIFUZARE.CODURI_LOCURI(INDEX_COD_LOC)
+                            || ' ';
+        END LOOP;
+
+        DBMS_OUTPUT.PUT_LINE('Coduri locuri: '
+                             || LISTA_LOCURI);
+        DBMS_OUTPUT.NEW_LINE();
+    END LOOP;
+END;
+/
+
+ALTER TABLE CLIENTI DROP COLUMN DATE_REZERVARI;
+
+DROP FUNCTION REZERVARI_CLIENT;
+
+DROP TYPE REZERVARI_CLIENT_DATE_DIFUZARI;
+
+DROP TYPE REZERVARI_CLIENT_DATE_DIFUZARE;
+
+DROP TYPE LISTA_CODURI_LOCURI;
+
+CREATE TYPE OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOC IS
+    OBJECT (
+        COD_LOC VARCHAR2(20),
+        STATUS VARCHAR2(20),
+        NUME_COMPLET VARCHAR2(255)
+    )
+/
+
+CREATE TYPE OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOCURI IS
+    TABLE OF OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOC;
+/
+
+CREATE OR REPLACE FUNCTION OCUPARE_LOCURI_LA_DIFUZARE (
+    ID_DIFUZARE_PARAM DIFUZARI.ID_DIFUZARE%TYPE
+) RETURN OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOCURI AS
+    CURSOR REZERVARE_LOC(
+        ID_LOC_PARAM LOCURI.ID_LOC%TYPE
+    ) IS (
+        SELECT
+            *
+        FROM
+            REZERVARI R
+        WHERE
+            R.ID_DIFUZARE = ID_DIFUZARE_PARAM
+            AND R.ID_LOC = ID_LOC_PARAM
+    );
+    DATE_REZERVARE    REZERVARI%ROWTYPE;
+    NUME_COMPLET      VARCHAR2(255);
+    REZERVARI_PER_LOC NUMBER(10);
+    LISTA_CODURI      OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOCURI;
+BEGIN
+    LISTA_CODURI := OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOCURI();
+    FOR DATE_LOC IN (
+        SELECT
+            L.*
+        FROM
+            (
+                SELECT
+                    *
+                FROM
+                    DIFUZARI D
+                WHERE
+                    D.ID_DIFUZARE = ID_DIFUZARE_PARAM
+            )      D
+            INNER JOIN SALI S
+            ON S.ID_SALA = D.ID_SALA
+            INNER JOIN LOCURI L
+            ON L.ID_SALA = S.ID_SALA
+    ) LOOP
+        OPEN REZERVARE_LOC(DATE_LOC.ID_LOC);
+        REZERVARI_PER_LOC := 0;
+        LOOP
+            FETCH REZERVARE_LOC INTO DATE_REZERVARE;
+            EXIT WHEN REZERVARE_LOC%NOTFOUND;
+            REZERVARI_PER_LOC := REZERVARI_PER_LOC + 1;
+            SELECT
+                (C.NUME
+                 || ' '
+                 || C.PRENUME) INTO NUME_COMPLET
+            FROM
+                CLIENTI C
+            WHERE
+                C.ID_CLIENT = DATE_REZERVARE.ID_CLIENT;
+        END LOOP;
+
+        CLOSE REZERVARE_LOC;
+        LISTA_CODURI.EXTEND;
+        IF REZERVARI_PER_LOC = 0 THEN
+            LISTA_CODURI(LISTA_CODURI.COUNT) := OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOC(DATE_LOC.COD, 'Neocupat', '');
+        ELSIF REZERVARI_PER_LOC = 1 THEN
+            LISTA_CODURI(LISTA_CODURI.COUNT) := OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOC(DATE_LOC.COD, 'Ocupat', NUME_COMPLET);
+        ELSE
+            LISTA_CODURI(LISTA_CODURI.COUNT) := OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOC(DATE_LOC.COD, 'Ocupat multiplu', '');
+        END IF;
+    END LOOP;
+
+    RETURN LISTA_CODURI;
+END OCUPARE_LOCURI_LA_DIFUZARE;
+/
+
+DECLARE
+    ID_DIFUZARE DIFUZARI.ID_DIFUZARE%TYPE := &ID_DIFUZARE;
+    DATE_LOCURI OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOCURI;
+    DATE_LOC    OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOC;
+BEGIN
+    DATE_LOCURI := OCUPARE_LOCURI_LA_DIFUZARE(ID_DIFUZARE);
+    FOR INDEX_DATE_LOC IN DATE_LOCURI.FIRST..DATE_LOCURI.LAST LOOP
+        DATE_LOC := DATE_LOCURI(INDEX_DATE_LOC);
+        DBMS_OUTPUT.PUT_LINE('Cod loc: '
+                             || DATE_LOC.COD_LOC);
+        DBMS_OUTPUT.PUT_LINE('Status: '
+                             || DATE_LOC.STATUS);
+        IF DATE_LOC.NUME_COMPLET IS NOT NULL THEN
+            DBMS_OUTPUT.PUT_LINE('Nume persoana: '
+                                 || DATE_LOC.NUME_COMPLET);
+        END IF;
+
+        DBMS_OUTPUT.NEW_LINE();
+    END LOOP;
+END;
+/
+
+DROP FUNCTION OCUPARE_LOCURI_LA_DIFUZARE;
+
+DROP TYPE OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOCURI;
+
+DROP TYPE OCUPARE_LOCURI_LA_DIFUZARE_DATE_LOC;
+
+CREATE OR REPLACE FUNCTION FILME_IN_CATEGORIE (
+    DENUMIRE_CATEGORIE_PARTIALA CATEGORII.NUME%TYPE
+) RETURN SYS_REFCURSOR AS
+    ID_CATEGORIE_GASIT CATEGORII.ID_CATEGORIE%TYPE;
+    CURSOR_FILME       SYS_REFCURSOR;
+BEGIN
+    SELECT
+        C.ID_CATEGORIE INTO ID_CATEGORIE_GASIT
+    FROM
+        CATEGORII C
+    WHERE
+        LOWER(C.NUME) LIKE LOWER('%'
+                                 || DENUMIRE_CATEGORIE_PARTIALA
+                                 || '%');
+    OPEN CURSOR_FILME FOR
+        SELECT
+            F.*
+        FROM
+            CATEGORII       C
+            INNER JOIN CATEGORII_FILME CF
+            ON CF.ID_CATEGORIE = C.ID_CATEGORIE
+            INNER JOIN FILME F
+            ON F.ID_FILM = CF.ID_FILM
+        WHERE
+            C.ID_CATEGORIE = ID_CATEGORIE_GASIT;
+    RETURN CURSOR_FILME;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(-20000, 'Nu exista categorii care sa se potriveasca cu denumirea data!');
+    WHEN TOO_MANY_ROWS THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Exista mai multe categorii care se potrivesc cu denumirea data!');
+END FILME_IN_CATEGORIE;
+/
+
+DECLARE
+    NUME_CATEGORIE VARCHAR2(255) := '&DENUMIRE_CATEGORIE';
+    CURSOR_FILM    SYS_REFCURSOR;
+    DATE_FILM      FILME%ROWTYPE;
+BEGIN
+    CURSOR_FILM := FILME_IN_CATEGORIE(NUME_CATEGORIE);
+    LOOP
+        FETCH CURSOR_FILM INTO DATE_FILM;
+        EXIT WHEN CURSOR_FILM%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(DATE_FILM.TITLU);
+        DBMS_OUTPUT.PUT_LINE('Durata: '
+                             || DATE_FILM.DURATA);
+        DBMS_OUTPUT.PUT_LINE('Data aparitiei: '
+                             || TO_CHAR(DATE_FILM.DATA_PUBLICARE, 'dd.mm.yyyy'));
+        DBMS_OUTPUT.NEW_LINE();
+    END LOOP;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare! '
+                             || SUBSTR(SQLERRM, 1, 255));
+END;
+/
+
+DROP FUNCTION FILME_IN_CATEGORIE;
+
+CREATE TYPE DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARE IS
+    OBJECT (
+        ID_DIFUZARE NUMBER(10),
+        COD_SALA VARCHAR2(255),
+        TITLU_FILM VARCHAR2(255),
+        DATA_DIFUZARE DATE,
+        PRET_DIFUZARE NUMBER,
+        NUME_PRENUME VARCHAR2(255),
+        COD_LOC VARCHAR2(255)
+    )
+/
+
+CREATE TYPE DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARI IS
+    TABLE OF DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARE
+/
+
+CREATE OR REPLACE PROCEDURE DIFUZARI_FILM_IN_INTERVAL_DE_TIMP (
+    ID_FILM_PARAM IN FILME.ID_FILM%TYPE,
+    DATA_INCEPUT_PARAM IN DIFUZARI.DATA%TYPE,
+    DATA_SFARSIT_PARAM IN DIFUZARI.DATA%TYPE,
+    DATE_DIFUZARI OUT DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARI
+) AS
+    EXCEPTIE_DATE_INVALIDE EXCEPTION;
+    EXCEPTIE_REZERVARE_INVALIDA EXCEPTION;
+BEGIN
+    IF DATA_INCEPUT_PARAM > DATA_SFARSIT_PARAM THEN
+        RAISE EXCEPTIE_DATE_INVALIDE;
+    END IF;
+
+    DATE_DIFUZARI := DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARI();
+    FOR DATE_DIFUZARE IN (
+        SELECT
+            FD.TITLU,
+            FD.DATA,
+            FD.ID_SALA,
+            FD.COD_SALA,
+            FD.PRET,
+            FD.ID_DIFUZARE,
+            L.COD,
+            L.ID_SALA      AS ID_SALA_LOC,
+            C.NUME
+            || ' '
+            || C.PRENUME   AS NUME_COMPLET
+        FROM
+            (
+                SELECT
+                    F.TITLU,
+                    D.ID_DIFUZARE,
+                    D.DATA,
+                    D.PRET,
+                    S.ID_SALA,
+                    S.COD         AS COD_SALA
+                FROM
+                    (
+                        SELECT
+                            *
+                        FROM
+                            FILME F
+                        WHERE
+                            F.ID_FILM = ID_FILM_PARAM
+                    )        F
+                    INNER JOIN DIFUZARI D
+                    ON D.ID_FILM = F.ID_FILM
+                    INNER JOIN SALI S
+                    ON S.ID_SALA = D.ID_SALA
+                WHERE
+                    D.DATA BETWEEN DATA_INCEPUT_PARAM AND DATA_SFARSIT_PARAM
+            )         FD
+            INNER JOIN REZERVARI R
+            ON FD.ID_DIFUZARE = R.ID_DIFUZARE
+            INNER JOIN LOCURI L
+            ON L.ID_LOC = R.ID_LOC
+            INNER JOIN CLIENTI C
+            ON C.ID_CLIENT = R.ID_CLIENT
+    ) LOOP
+        IF DATE_DIFUZARE.ID_SALA != DATE_DIFUZARE.ID_SALA_LOC THEN
+            RAISE EXCEPTIE_REZERVARE_INVALIDA;
+        END IF;
+
+        DATE_DIFUZARI.EXTEND;
+        DATE_DIFUZARI(DATE_DIFUZARI.COUNT) := DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARE( DATE_DIFUZARE.ID_DIFUZARE, DATE_DIFUZARE.COD_SALA, DATE_DIFUZARE.TITLU, DATE_DIFUZARE.DATA, DATE_DIFUZARE.PRET, DATE_DIFUZARE.NUME_COMPLET, DATE_DIFUZARE.COD );
+    END LOOP;
+EXCEPTION
+    WHEN EXCEPTIE_DATE_INVALIDE THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Data de inceput succede data de sfarsit.');
+    WHEN EXCEPTIE_REZERVARE_INVALIDA THEN
+        RAISE_APPLICATION_ERROR(-20003, 'O rezervare invalida a fost gasita in lista rezervarilor asociate difuzarilor.');
+END DIFUZARI_FILM_IN_INTERVAL_DE_TIMP;
+/
+
+DECLARE
+    ID_FILM_1             FILME.ID_FILM%TYPE := 1;
+    DATA_INCEPUT_1        DIFUZARI.DATA%TYPE := TO_DATE('2025/09/15', 'yyyy/mm/dd');
+    DATA_SFARSIT_1        DIFUZARI.DATA%TYPE := TO_DATE('2025/09/15', 'yyyy/mm/dd');
+    ID_FILM_2             FILME.ID_FILM%TYPE := 2;
+    DATA_INCEPUT_2        DIFUZARI.DATA%TYPE := TO_DATE('2025/09/25', 'yyyy/mm/dd');
+    DATA_SFARSIT_2        DIFUZARI.DATA%TYPE := TO_DATE('2025/09/15', 'yyyy/mm/dd');
+    ID_LOC_REZERVARE      REZERVARI.ID_LOC%TYPE;
+    ID_DIFUZARE_REZERVARE REZERVARI.ID_DIFUZARE%TYPE;
+    ID_CLIENT_REZERVARE   REZERVARI.ID_CLIENT%TYPE := ROUND(DBMS_RANDOM.VALUE(1, 100));
+    DATE_DIFUZARI         DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARI;
+    DATE_DIFUZARE         DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARE;
+
+    PROCEDURE AFISARE_DATE_DIFUZARI (
+        DATE_DIFUZARI IN DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARI
+    ) IS
+    BEGIN
+        FOR INDEX_DATE_DIFUZARE IN DATE_DIFUZARI.FIRST..DATE_DIFUZARI.LAST LOOP
+            DATE_DIFUZARE := DATE_DIFUZARI(INDEX_DATE_DIFUZARE);
+            DBMS_OUTPUT.PUT_LINE('Inregistrarea '
+                                 || INDEX_DATE_DIFUZARE);
+            DBMS_OUTPUT.PUT_LINE('Sala: '
+                                 || DATE_DIFUZARE.COD_SALA);
+            DBMS_OUTPUT.PUT_LINE('Film: '
+                                 || DATE_DIFUZARE.TITLU_FILM);
+            DBMS_OUTPUT.PUT_LINE('Difuzare: '
+                                 || DATE_DIFUZARE.ID_DIFUZARE);
+            DBMS_OUTPUT.PUT_LINE('Data difuzarii: '
+                                 || TO_CHAR(DATE_DIFUZARE.DATA_DIFUZARE, 'dd.mm.yyyy'));
+            DBMS_OUTPUT.PUT_LINE('Pret pentru bilet: '
+                                 || DATE_DIFUZARE.PRET_DIFUZARE);
+            DBMS_OUTPUT.PUT_LINE('Nume complet: '
+                                 || DATE_DIFUZARE.NUME_PRENUME);
+            DBMS_OUTPUT.PUT_LINE('Cod loc: '
+                                 || DATE_DIFUZARE.COD_LOC);
+            DBMS_OUTPUT.NEW_LINE();
+        END LOOP;
+    END AFISARE_DATE_DIFUZARI;
+BEGIN
+    SELECT
+        D.ID_DIFUZARE INTO ID_DIFUZARE_REZERVARE
+    FROM
+        (
+            SELECT
+                D.ID_DIFUZARE
+            FROM
+                DIFUZARI D
+            WHERE
+                D.ID_FILM = ID_FILM_1
+                AND D.DATA BETWEEN DATA_INCEPUT_1 AND DATA_SFARSIT_1
+        ) D
+    WHERE
+        ROWNUM <= 1;
+    ID_LOC_REZERVARE := LOC_ALEATOR_LA_DIFUZARE(ID_DIFUZARE_REZERVARE);
+ 
+    -- Caz simplu
+    DIFUZARI_FILM_IN_INTERVAL_DE_TIMP(ID_FILM_1, DATA_INCEPUT_1, DATA_SFARSIT_1, DATE_DIFUZARI);
+    AFISARE_DATE_DIFUZARI(DATE_DIFUZARI);
+ 
+    -- Caz in care datele sunt invalide
+    BEGIN
+        DIFUZARI_FILM_IN_INTERVAL_DE_TIMP(ID_FILM_2, DATA_INCEPUT_2, DATA_SFARSIT_2, DATE_DIFUZARI);
+        AFISARE_DATE_DIFUZARI(DATE_DIFUZARI);
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Eroare! '
+                                 || SUBSTR(SQLERRM, 1, 255));
+    END;
+ 
+
+    -- Caz in care se insereaza o rezervare noua
+    INSERT INTO REZERVARI(
+        ID_LOC,
+        ID_DIFUZARE,
+        ID_CLIENT
+    ) VALUES (
+        ID_LOC_REZERVARE,
+        ID_DIFUZARE_REZERVARE,
+        ID_CLIENT_REZERVARE
+    );
+    BEGIN
+        DIFUZARI_FILM_IN_INTERVAL_DE_TIMP(ID_FILM_1, DATA_INCEPUT_1, DATA_SFARSIT_1, DATE_DIFUZARI);
+        AFISARE_DATE_DIFUZARI(DATE_DIFUZARI);
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Eroare! '
+                                 || SUBSTR(SQLERRM, 1, 255));
+    END;
+ 
+
+    -- Caz in care se detecteaza on rezervare invalida
+    UPDATE REZERVARI R
+    SET
+        R.ID_LOC = ID_LOC_REZERVARE + 30
+    WHERE
+        R.ID_LOC = ID_LOC_REZERVARE
+        AND R.ID_DIFUZARE = ID_DIFUZARE_REZERVARE
+        AND R.ID_CLIENT = ID_CLIENT_REZERVARE;
+    BEGIN
+        DIFUZARI_FILM_IN_INTERVAL_DE_TIMP(ID_FILM_1, DATA_INCEPUT_1, DATA_SFARSIT_1, DATE_DIFUZARI);
+        AFISARE_DATE_DIFUZARI(DATE_DIFUZARI);
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Eroare! '
+                                 || SUBSTR(SQLERRM, 1, 255));
+    END;
+    DELETE FROM REZERVARI R
+    WHERE
+        R.ID_LOC = ID_LOC_REZERVARE
+        AND R.ID_DIFUZARE = ID_DIFUZARE_REZERVARE
+        AND R.ID_CLIENT = ID_CLIENT_REZERVARE;
+END;
+/
+
+DROP PROCEDURE DIFUZARI_FILM_IN_INTERVAL_DE_TIMP;
+
+DROP TYPE DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARI;
+
+DROP TYPE DIFUZARI_FILM_IN_INTERVAL_DE_TIMP_DATE_DIFUZARE;
+
+ALTER TABLE CINEMATOGRAFE
+    ADD MEDIE_REZERVARI_PER_DIFUZARE NUMBER(
+        10,
+        4
+    );
+
+/
+
+CREATE OR REPLACE PROCEDURE ACTUALIZEAZA_MEDIE_REZERVARI_PER_DIFUZARE AS
+BEGIN
+    FOR DATE_REZERVARI IN (
+        SELECT
+            S.ID_CINEMATOGRAF,
+            AVG(NUMAR_REZERVARI) AS MEDIE_REZERVARI_PER_DIFUZARE
+        FROM
+            (
+                SELECT
+                    D.ID_DIFUZARE,
+                    D.ID_SALA,
+                    COUNT(R.ID_LOC) AS NUMAR_REZERVARI
+                FROM
+                    DIFUZARI  D
+                    INNER JOIN REZERVARI R
+                    ON R.ID_DIFUZARE = D.ID_DIFUZARE
+                GROUP BY
+                    D.ID_DIFUZARE,
+                    D.ID_SALA
+            )    DR
+            INNER JOIN SALI S
+            ON S.ID_SALA = DR.ID_SALA
+        GROUP BY
+            S.ID_CINEMATOGRAF
+    ) LOOP
+        UPDATE CINEMATOGRAFE C
+        SET
+            C.MEDIE_REZERVARI_PER_DIFUZARE = DATE_REZERVARI.MEDIE_REZERVARI_PER_DIFUZARE
+        WHERE
+            C.ID_CINEMATOGRAF = DATE_REZERVARI.ID_CINEMATOGRAF;
+    END LOOP;
+END ACTUALIZEAZA_MEDIE_REZERVARI_PER_DIFUZARE;
+/
+
+BEGIN
+    ACTUALIZEAZA_MEDIE_REZERVARI_PER_DIFUZARE();
+END;
+/
+
+CREATE OR REPLACE TRIGGER ACTUALIZEAZA_MEDIE_REZERVARI_PER_DIFUZARE_TRIGGER AFTER
+    DELETE OR UPDATE OR INSERT OF ID_DIFUZARE ON REZERVARI
+BEGIN
+    ACTUALIZEAZA_MEDIE_REZERVARI_PER_DIFUZARE();
+END;
+/
+
+DECLARE
+    ID_DIFUZARE_REZERVARE     REZERVARI.ID_DIFUZARE%TYPE := 1;
+    ID_DIFUZARE_REZERVARE_NOU REZERVARI.ID_DIFUZARE%TYPE := 2;
+    ID_LOC_REZERVARE          REZERVARI.ID_LOC%TYPE;
+    ID_LOC_REZERVARE_NOU      REZERVARI.ID_LOC%TYPE;
+    ID_CLIENT_REZERVARE       REZERVARI.ID_CLIENT%TYPE := ROUND(DBMS_RANDOM.VALUE(1, 100));
+
+    PROCEDURE AFISARE_CINEMA (
+        MESAJ_INCEPUT IN VARCHAR2
+    ) AS
+    BEGIN
+        DBMS_OUTPUT.PUT_LINE(MESAJ_INCEPUT);
+        DBMS_OUTPUT.NEW_LINE();
+        FOR DATE_CINEMA IN (
+            SELECT
+                *
+            FROM
+                CINEMATOGRAFE C
+                INNER JOIN LOCATII L
+                ON L.ID_LOCATIE = C.ID_LOCATIE
+        ) LOOP
+            DBMS_OUTPUT.PUT_LINE(DATE_CINEMA.NUME);
+            DBMS_OUTPUT.PUT_LINE('Adresa: '
+                                 || DATE_CINEMA.ADRESA);
+            DBMS_OUTPUT.PUT_LINE('Medie rezervari per difuzare: '
+                                 || DATE_CINEMA.MEDIE_REZERVARI_PER_DIFUZARE);
+            DBMS_OUTPUT.NEW_LINE();
+        END LOOP;
+    END AFISARE_CINEMA;
+BEGIN
+    ID_LOC_REZERVARE := LOC_ALEATOR_LA_DIFUZARE(ID_DIFUZARE_REZERVARE);
+    ID_LOC_REZERVARE_NOU := LOC_ALEATOR_LA_DIFUZARE(ID_DIFUZARE_REZERVARE_NOU);
+    AFISARE_CINEMA('Initial:');
+ 
+    -- Dupa crearea unei rezervari noi
+    INSERT INTO REZERVARI(
+        ID_LOC,
+        ID_DIFUZARE,
+        ID_CLIENT
+    ) VALUES (
+        ID_LOC_REZERVARE,
+        ID_DIFUZARE_REZERVARE,
+        ID_CLIENT_REZERVARE
+    );
+    AFISARE_CINEMA('Dupa crearea unei rezervari noi:');
+ 
+    -- Dupa modificarea rezervarii create
+    UPDATE REZERVARI R
+    SET
+        R.ID_LOC = ID_LOC_REZERVARE_NOU,
+        R.ID_DIFUZARE = ID_DIFUZARE_REZERVARE_NOU
+    WHERE
+        R.ID_LOC = ID_LOC_REZERVARE
+        AND R.ID_DIFUZARE = ID_DIFUZARE_REZERVARE
+        AND R.ID_CLIENT = ID_CLIENT_REZERVARE;
+    AFISARE_CINEMA('Dupa modificarea rezervarii:');
+ 
+    -- Dupa stergerea rezervarii modificate
+    DELETE FROM REZERVARI R
+    WHERE
+        R.ID_LOC = ID_LOC_REZERVARE_NOU
+        AND R.ID_DIFUZARE = ID_DIFUZARE_REZERVARE_NOU
+        AND R.ID_CLIENT = ID_CLIENT_REZERVARE;
+    AFISARE_CINEMA('Dupa stergerea rezervarii:');
+END;
+/
+
+DROP TRIGGER ACTUALIZEAZA_MEDIE_REZERVARI_PER_DIFUZARE_TRIGGER;
+
+DROP PROCEDURE ACTUALIZEAZA_MEDIE_REZERVARI_PER_DIFUZARE;
+
+ALTER TABLE CINEMATOGRAFE DROP COLUMN MEDIE_REZERVARI_PER_DIFUZARE;
+
+CREATE OR REPLACE TRIGGER VALIDARE_LOC_REZERVARE_SALA BEFORE
+    UPDATE OR INSERT OF ID_LOC ON REZERVARI FOR EACH ROW
+DECLARE
+    DATE_DIFUZARE DIFUZARI%ROWTYPE;
+    ID_SALA_LOC   SALI.ID_SALA%TYPE;
+BEGIN
+    SELECT
+        L.ID_SALA INTO ID_SALA_LOC
+    FROM
+        LOCURI L
+    WHERE
+        L.ID_LOC = :NEW.ID_LOC;
+    SELECT
+        * INTO DATE_DIFUZARE
+    FROM
+        DIFUZARI D
+    WHERE
+        D.ID_DIFUZARE = :NEW.ID_DIFUZARE;
+    IF ID_SALA_LOC != DATE_DIFUZARE.ID_SALA THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Locul asociat rezervarii nu se afla in sala unde se difuzeaza filmul!');
+    END IF;
+
+    IF DATE_DIFUZARE.DATA < :NEW.DATA THEN
+        RAISE_APPLICATION_ERROR(-20005, 'Data rezervarii succede data difuzarii!');
+    END IF;
+END;
+/
+
+DECLARE
+    ID_LOC_REZERVARE      REZERVARI.ID_LOC%TYPE;
+    ID_DIFUZARE_REZERVARE REZERVARI.ID_DIFUZARE%TYPE := ROUND(DBMS_RANDOM.VALUE(1, 50));
+    ID_CLIENT_REZERVARE   REZERVARI.ID_CLIENT%TYPE := ROUND(DBMS_RANDOM.VALUE(1, 100));
+    ZI_DIFUZARE           NUMBER(10);
+
+    PROCEDURE TESTEAZA_INSERARE (
+        ID_LOC_PARAM IN REZERVARI.ID_LOC%TYPE,
+        ID_DIFUZARE_PARAM IN REZERVARI.ID_DIFUZARE%TYPE,
+        ID_CLIENT_PARAM IN REZERVARI.ID_CLIENT%TYPE,
+        ZI_DIFUZARE_PARAM NUMBER
+    ) AS
+    BEGIN
+        INSERT INTO REZERVARI VALUES (
+            ID_LOC_PARAM,
+            ID_DIFUZARE_PARAM,
+            ID_CLIENT_PARAM,
+            TO_DATE('2025/09/'
+                    || ZI_DIFUZARE_PARAM, 'yyyy/mm/dd')
+        );
+        DBMS_OUTPUT.PUT_LINE('Inserare realizata cu succes!');
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Eroare! '
+                                 || SUBSTR(SQLERRM, 1, 255));
+    END TESTEAZA_INSERARE;
+
+    PROCEDURE TESTEAZA_EDITARE (
+        ID_LOC_PARAM IN REZERVARI.ID_LOC%TYPE,
+        ID_DIFUZARE_PARAM IN REZERVARI.ID_DIFUZARE%TYPE,
+        ID_CLIENT_PARAM IN REZERVARI.ID_CLIENT%TYPE,
+        ID_LOC_NOU_PARAM IN REZERVARI.ID_LOC%TYPE,
+        ZI_DIFUZARE_NOU_PARAM NUMBER
+    ) AS
+    BEGIN
+        UPDATE REZERVARI
+        SET
+            ID_LOC = ID_LOC_NOU_PARAM,
+            DATA = TO_DATE(
+                '2025/09/'
+                || ZI_DIFUZARE_NOU_PARAM,
+                'yyyy/mm/dd'
+            )
+        WHERE
+            ID_LOC = ID_LOC_PARAM
+            AND ID_DIFUZARE = ID_DIFUZARE_PARAM
+            AND ID_CLIENT =ID_CLIENT_PARAM;
+        DBMS_OUTPUT.PUT_LINE('Editare realizata cu succes!');
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Eroare! '
+                                 || SUBSTR(SQLERRM, 1, 255));
+    END TESTEAZA_EDITARE;
+BEGIN
+    ID_LOC_REZERVARE := LOC_ALEATOR_LA_DIFUZARE(ID_DIFUZARE_REZERVARE);
+    SELECT
+        TO_NUMBER(TO_CHAR(D.DATA, 'dd')) INTO ZI_DIFUZARE
+    FROM
+        DIFUZARI D
+    WHERE
+        D.ID_DIFUZARE = ID_DIFUZARE_REZERVARE;
+ 
+    -- Caz in care inserarea nu functioneaza pentru ca sala locului difera de sala difuzarii
+    TESTEAZA_INSERARE( ID_LOC_REZERVARE + 30, ID_DIFUZARE_REZERVARE, ID_CLIENT_REZERVARE, ZI_DIFUZARE );
+ 
+    -- Caz in care inserarea nu functioneaza pentru ca data rezervarii succede data difuzarii
+    TESTEAZA_INSERARE( ID_LOC_REZERVARE, ID_DIFUZARE_REZERVARE, ID_CLIENT_REZERVARE, ZI_DIFUZARE + 1 );
+ 
+    -- Caz in care inserarea functioneaza
+    TESTEAZA_INSERARE( ID_LOC_REZERVARE, ID_DIFUZARE_REZERVARE, ID_CLIENT_REZERVARE, ZI_DIFUZARE - 1 );
+ 
+    -- Caz in care editarea nu functioneaza pentru ca sala locului difera de sala difuzarii
+    TESTEAZA_EDITARE(ID_LOC_REZERVARE, ID_DIFUZARE_REZERVARE, ID_CLIENT_REZERVARE, ID_LOC_REZERVARE + 30, ZI_DIFUZARE - 1);
+ 
+    -- Caz in care editarea nu functioneaza pentru ca data rezervarii succede data difuzarii
+    TESTEAZA_EDITARE(ID_LOC_REZERVARE, ID_DIFUZARE_REZERVARE, ID_CLIENT_REZERVARE, ID_LOC_REZERVARE, ZI_DIFUZARE + 1);
+ 
+    -- Caz in care editarea functioneaza
+    TESTEAZA_EDITARE(ID_LOC_REZERVARE, ID_DIFUZARE_REZERVARE, ID_CLIENT_REZERVARE, ID_LOC_REZERVARE + 1, ZI_DIFUZARE - 1);
+END;
+
+DROP TRIGGER VALIDARE_LOC_REZERVARE_SALA;
+/
+
+CREATE SEQUENCE SEQ_BACKUP_TABLE_INDEX START WITH 1 INCREMENT BY 1 MINVALUE 1 NOMAXVALUE NOCYCLE CACHE 2;
+
+CREATE OR REPLACE TRIGGER BACKUP_TABEL_MODIFICAT_SAU_STERS BEFORE ALTER OR DROP ON SCHEMA
+DECLARE
+    NUME_OBIECT        VARCHAR2(255);
+    TIP_OBIECT         VARCHAR2(255);
+    QUERY_BACKUP_TABEL VARCHAR2(255);
+BEGIN
+    NUME_OBIECT := UPPER(TRIM(ORA_DICT_OBJ_NAME));
+    TIP_OBIECT := UPPER(TRIM(ORA_DICT_OBJ_TYPE));
+    IF TIP_OBIECT = 'TABLE' THEN
+        QUERY_BACKUP_TABEL := 'CREATE TABLE BACKUP_'
+                              || SEQ_BACKUP_TABLE_INDEX.NEXTVAL
+                              || '_'
+                              || NUME_OBIECT
+                              || ' AS (SELECT * FROM '
+                              || NUME_OBIECT
+                              || ')';
+        EXECUTE IMMEDIATE QUERY_BACKUP_TABEL;
+        DBMS_OUTPUT.PUT_LINE('S-a realizat backup la tabelul '
+                             ||NUME_OBIECT );
+    END IF;
+END;
+/
+
+CREATE TABLE CINEMATOGRAFE_AUXILIAR AS (
+    SELECT
+        *
+    FROM
+        SGBD_USER.CINEMATOGRAFE
+);
+
+SELECT
+    *
+FROM
+    CINEMATOGRAFE_AUXILIAR;
+
+ALTER TABLE CINEMATOGRAFE_AUXILIAR
+    ADD STATISTICA_AUXILIARA NUMBER(
+        10,
+        4
+    );
+
+DROP TABLE CINEMATOGRAFE_AUXILIAR;
+
+SELECT * FROM BACKUP_1_CINEMATOGRAFE_AUXILIAR;
+
+SELECT * FROM BACKUP_2_CINEMATOGRAFE_AUXILIAR;
+
+/
+
+DROP TRIGGER BACKUP_TABEL_MODIFICAT_SAU_STERS;
+
+DROP SEQUENCE SEQ_BACKUP_TABLE_INDEX;
