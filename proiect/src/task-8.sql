@@ -1,0 +1,32 @@
+CREATE OR REPLACE FUNCTION FILME_IN_CATEGORIE (
+    DENUMIRE_CATEGORIE_PARTIALA CATEGORII.NUME%TYPE
+) RETURN SYS_REFCURSOR AS
+    ID_CATEGORIE_GASIT CATEGORII.ID_CATEGORIE%TYPE;
+    CURSOR_FILME       SYS_REFCURSOR;
+BEGIN
+    SELECT
+        C.ID_CATEGORIE INTO ID_CATEGORIE_GASIT
+    FROM
+        CATEGORII C
+    WHERE
+        LOWER(C.NUME) LIKE LOWER('%'
+                                 || DENUMIRE_CATEGORIE_PARTIALA
+                                 || '%');
+    OPEN CURSOR_FILME FOR
+        SELECT
+            F.*
+        FROM
+            CATEGORII       C
+            INNER JOIN CATEGORII_FILME CF
+            ON CF.ID_CATEGORIE = C.ID_CATEGORIE
+            INNER JOIN FILME F
+            ON F.ID_FILM = CF.ID_FILM
+        WHERE
+            C.ID_CATEGORIE = ID_CATEGORIE_GASIT;
+    RETURN CURSOR_FILME;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(-20000, 'Nu exista categorii care sa se potriveasca cu denumirea data!');
+    WHEN TOO_MANY_ROWS THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Exista mai multe categorii care se potrivesc cu denumirea data!');
+END FILME_IN_CATEGORIE;
